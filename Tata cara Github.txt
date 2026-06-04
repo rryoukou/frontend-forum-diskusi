@@ -1,0 +1,8 @@
+git clone https://github.com/rryoukou/frontend-forum-diskusi.git
+ 
+Pindah ke branch sendiri contoh :   git checkout alfian-dev
+ 
+Simpan progres (Commit) contoh:  git add .     git commit -m "menambah fitur navbar"
+
+Kirim ke GitHub (Push) contoh: git push origin alfian-dev
+
