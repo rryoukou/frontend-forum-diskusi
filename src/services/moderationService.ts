@@ -16,6 +16,11 @@ const moderationService = {
     return response.data;
   },
 
+  unbanUser: async (userId: string, reason: string): Promise<any> => {
+    const response = await api.post('/moderation/unban', { user_id: userId, reason });
+    return response.data;
+  },
+
   warnUser: async (userId: string, reason: string, notes?: string): Promise<any> => {
     const response = await api.post('/moderation/warn', { user_id: userId, reason, notes });
     return response.data;

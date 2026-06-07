@@ -4,6 +4,7 @@ import Layout from '../layouts/Layout';
 import userService from '../services/userService';
 import postService from '../services/postService';
 import authService from '../services/authService';
+import moderationService from '../services/moderationService';
 import type { User, Post } from '../types/index';
 import './Profile.css';
 
@@ -50,6 +51,45 @@ const Profile: React.FC = () => {
     }
   };
 
+  const handleWarnUser = async () => {
+    if (!profile) return;
+    const reason = window.prompt(`Enter warning reason for user @${profile.username}:`);
+    if (!reason) return;
+    try {
+      await moderationService.warnUser(profile.id, reason);
+      alert(`User @${profile.username} has been warned.`);
+    } catch (err) {
+      alert('Failed to warn user');
+    }
+  };
+
+  const handleBanUser = async () => {
+    if (!profile) return;
+    const reason = window.prompt(`Enter BAN reason for user @${profile.username}:`);
+    if (!reason) return;
+    if (!window.confirm(`Are you SURE you want to BAN user @${profile.username}?`)) return;
+    try {
+      await moderationService.banUser(profile.id, reason);
+      alert(`User @${profile.username} has been BANNED.`);
+      fetchProfileData(); // Refresh to show banned status if needed
+    } catch (err) {
+      alert('Failed to ban user');
+    }
+  };
+
+  const handleUnbanUser = async () => {
+    if (!profile) return;
+    const reason = window.prompt(`Enter unban reason for user @${profile.username}:`);
+    if (!reason) return;
+    try {
+      await moderationService.unbanUser(profile.id, reason);
+      alert(`User @${profile.username} has been unbanned.`);
+      fetchProfileData();
+    } catch (err) {
+      alert('Failed to unban user');
+    }
+  };
+
   if (loading) return <Layout><div className="loading-spinner">Loading profile...</div></Layout>;
   if (!profile) return <Layout><div className="card">User not found.</div></Layout>;
 
@@ -88,6 +128,35 @@ const Profile: React.FC = () => {
               >
                 {isFollowing ? 'Unfollow' : 'Follow'}
               </button>
+            )}
+
+            {currentUser && authService.isModerator() && currentUser.id !== profile.id && (
+              <div style={{ display: 'flex', gap: 'var(--spacing-2)', marginBottom: 'var(--spacing-4)' }}>
+                <button 
+                  onClick={handleWarnUser} 
+                  className="btn btn-outline"
+                  style={{ flex: 1, borderColor: '#fcd34d', color: '#b45309', fontSize: '0.8rem', padding: 'var(--spacing-2)' }}
+                >
+                  ⚠️ Warn
+                </button>
+                {profile.is_banned ? (
+                  <button 
+                    onClick={handleUnbanUser} 
+                    className="btn btn-outline"
+                    style={{ flex: 1, borderColor: '#91d5ff', color: '#1890ff', fontSize: '0.8rem', padding: 'var(--spacing-2)' }}
+                  >
+                    🔓 Unban
+                  </button>
+                ) : (
+                  <button 
+                    onClick={handleBanUser} 
+                    className="btn btn-outline"
+                    style={{ flex: 1, borderColor: '#fca5a5', color: '#ef4444', fontSize: '0.8rem', padding: 'var(--spacing-2)' }}
+                  >
+                    🚫 Ban
+                  </button>
+                )}
+              </div>
             )}
 
             <div className="profile-stats">

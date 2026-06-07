@@ -59,6 +59,20 @@ const AdminDashboard: React.FC = () => {
     }
   };
 
+  const handleUnbanUser = async (userId: string) => {
+    const reason = window.prompt('Enter reason for unbanning this user:');
+    if (!reason) return;
+    try {
+      await moderationService.unbanUser(userId, reason);
+      alert('User unbanned successfully');
+      // Refresh list
+      const usersData = await userService.getAdminUsers();
+      setUsers(usersData.data);
+    } catch (error) {
+      console.error('Unban failed');
+    }
+  };
+
   const handleWarnUser = async (userId: string) => {
     const reason = window.prompt('Enter warning reason:');
     if (!reason) return;
@@ -138,12 +152,21 @@ const AdminDashboard: React.FC = () => {
                       >
                         Warn
                       </button>
-                      <button 
-                        onClick={() => handleBanUser(user.id)}
-                        style={{ padding: '0.3rem 0.6rem', cursor: 'pointer', backgroundColor: '#fff1f0', color: '#ef4444', border: '1px solid #ffa39e' }}
-                      >
-                        Ban
-                      </button>
+                      {user.is_banned ? (
+                        <button 
+                          onClick={() => handleUnbanUser(user.id)}
+                          style={{ padding: '0.3rem 0.6rem', cursor: 'pointer', backgroundColor: '#e6f7ff', color: '#1890ff', border: '1px solid #91d5ff' }}
+                        >
+                          Unban
+                        </button>
+                      ) : (
+                        <button 
+                          onClick={() => handleBanUser(user.id)}
+                          style={{ padding: '0.3rem 0.6rem', cursor: 'pointer', backgroundColor: '#fff1f0', color: '#ef4444', border: '1px solid #ffa39e' }}
+                        >
+                          Ban
+                        </button>
+                      )}
                     </div>
                   )}
                 </td>

@@ -22,8 +22,8 @@ const commentService = {
     return response.data;
   },
 
-  deleteComment: async (id: string): Promise<void> => {
-    await api.delete(`/comments/${id}`);
+  deleteComment: async (id: string, reason?: string): Promise<void> => {
+    await api.delete(`/comments/${id}`, { params: { reason } });
   },
 
   getCommentHistory: async (id: string): Promise<any[]> => {

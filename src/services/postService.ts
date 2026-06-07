@@ -27,8 +27,8 @@ const postService = {
     return response.data;
   },
 
-  deletePost: async (id: string): Promise<void> => {
-    await api.delete(`/posts/${id}`);
+  deletePost: async (id: string, reason?: string): Promise<void> => {
+    await api.delete(`/posts/${id}`, { params: { reason } });
   },
 
   getPostHistory: async (id: string): Promise<any[]> => {

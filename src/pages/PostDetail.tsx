@@ -14,6 +14,7 @@ interface CommentItemProps {
   comment: Comment;
   user: any;
   isAuthor: boolean;
+  isModerator: boolean;
   onVote: (id: string, type: 'upvote' | 'downvote') => void;
   onLike: (id: string) => void;
   onReport: (id: string, type: 'post' | 'comment') => void;
@@ -30,7 +31,7 @@ interface CommentItemProps {
 }
 
 const CommentItem: React.FC<CommentItemProps> = ({ 
-  comment, user, isAuthor, onVote, onLike, onReport, onDelete, onEdit, onHistory, onAccept, onReply,
+  comment, user, isAuthor, isModerator, onVote, onLike, onReport, onDelete, onEdit, onHistory, onAccept, onReply,
   editingCommentId, editCommentBody, onEditChange, onEditSubmit, onEditCancel
 }) => {
   return (
@@ -55,9 +56,11 @@ const CommentItem: React.FC<CommentItemProps> = ({
         
         <div style={{ marginLeft: 'auto', display: 'flex', gap: 'var(--spacing-2)' }}>
           <button onClick={() => onHistory(comment.id, 'comment')} className="btn-text" style={{ fontSize: '0.75rem' }}>History</button>
-          {user && user.id === comment.user_id && (
+          {user && (user.id === comment.user_id || isModerator) && (
             <>
-              <button onClick={() => onEdit(comment)} className="btn-text" style={{ fontSize: '0.75rem' }}>Edit</button>
+              {user.id === comment.user_id && (
+                <button onClick={() => onEdit(comment)} className="btn-text" style={{ fontSize: '0.75rem' }}>Edit</button>
+              )}
               <button onClick={() => onDelete(comment.id)} className="btn-text" style={{ fontSize: '0.75rem', color: '#ef4444' }}>Delete</button>
             </>
           )}
@@ -129,6 +132,7 @@ const CommentItem: React.FC<CommentItemProps> = ({
               comment={child} 
               user={user} 
               isAuthor={isAuthor}
+              isModerator={isModerator}
               onVote={onVote}
               onLike={onLike}
               onReport={onReport}
@@ -186,10 +190,18 @@ const PostDetail: React.FC = () => {
   }, [id]);
 
   const handlePostDelete = async () => {
+    if (!id || !post) return;
+    const isModeratorDeletion = user && user.id !== post.user_id && authService.isModerator();
+    
     if (!window.confirm('Are you sure you want to delete this post?')) return;
-    if (!id) return;
+    
+    let reason = '';
+    if (isModeratorDeletion) {
+      reason = window.prompt('Enter reason for deletion (optional):') || 'Pelanggaran aturan komunitas';
+    }
+
     try {
-      await postService.deletePost(id);
+      await postService.deletePost(id, reason);
       navigate('/');
     } catch (error) {
       console.error('Delete failed');
@@ -247,9 +259,29 @@ const PostDetail: React.FC = () => {
   };
 
   const handleCommentDelete = async (commentId: string) => {
+    // Cari data komentar yang mau dihapus untuk cek kepemilikan
+    const findComment = (list: Comment[]): Comment | undefined => {
+      for (const c of list) {
+        if (c.id === commentId) return c;
+        if (c.children) {
+          const found = findComment(c.children);
+          if (found) return found;
+        }
+      }
+    };
+    
+    const commentToDelete = findComment(comments);
+    const isModeratorDeletion = user && commentToDelete && user.id !== commentToDelete.user_id && authService.isModerator();
+
     if (!window.confirm('Are you sure you want to delete this comment?')) return;
+    
+    let reason = '';
+    if (isModeratorDeletion) {
+      reason = window.prompt('Enter reason for deletion (optional):') || 'Pelanggaran aturan komunitas';
+    }
+
     try {
-      await commentService.deleteComment(commentId);
+      await commentService.deleteComment(commentId, reason);
       await fetchPost();
     } catch (error) {
       console.error('Comment delete failed');
@@ -332,6 +364,7 @@ const PostDetail: React.FC = () => {
   if (!post) return <Layout><div className="card">Post not found</div></Layout>;
 
   const isAuthor = user && user.id === post.user_id;
+  const isModerator = authService.isModerator();
 
   return (
     <Layout>
@@ -348,11 +381,13 @@ const PostDetail: React.FC = () => {
                 <button onClick={() => showHistory(post.id, 'post')} className="btn-text" style={{ fontSize: '0.75rem', marginLeft: 'var(--spacing-2)' }}>View History</button>
               </div>
               
-              {isAuthor && (
+              {(isAuthor || isModerator) && (
                 <div style={{ display: 'flex', gap: 'var(--spacing-2)' }}>
-                  <Link to={`/posts/${post.id}/edit`} className="btn btn-outline" style={{ padding: 'var(--spacing-1) var(--spacing-3)', fontSize: '0.875rem' }}>
-                    Edit
-                  </Link>
+                  {isAuthor && (
+                    <Link to={`/posts/${post.id}/edit`} className="btn btn-outline" style={{ padding: 'var(--spacing-1) var(--spacing-3)', fontSize: '0.875rem' }}>
+                      Edit
+                    </Link>
+                  )}
                   <button onClick={handlePostDelete} className="btn btn-outline" style={{ padding: 'var(--spacing-1) var(--spacing-3)', fontSize: '0.875rem', color: '#ef4444', borderColor: '#fee2e2' }}>
                     Delete
                   </button>
@@ -441,6 +476,7 @@ const PostDetail: React.FC = () => {
                   comment={comment} 
                   user={user} 
                   isAuthor={isAuthor}
+                  isModerator={isModerator}
                   onVote={handleCommentVote}
                   onLike={handleCommentLike}
                   onReport={handleReport}
