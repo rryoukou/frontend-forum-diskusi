@@ -1,4 +1,4 @@
-# 🏛️ Backend Forum Diskusi (Kelompok 5)
+# 🏛️ Frontend Forum Diskusi (Kelompok 5)
 
 <p align="center">
   <img src="https://img.shields.io/badge/Main%20Level-Advanced%20%28Semua%20Level%29-blueviolet?style=for-the-badge&logo=github" alt="Main Level">
