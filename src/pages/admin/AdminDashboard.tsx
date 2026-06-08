@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import AdminLayout from '../../layouts/AdminLayout';
 import userService from '../../services/userService';
 import moderationService from '../../services/moderationService';
-import authService from '../../services/authService';
 import type { User } from '../../types/index';
 
 const AdminDashboard: React.FC = () => {

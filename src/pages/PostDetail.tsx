@@ -363,7 +363,7 @@ const PostDetail: React.FC = () => {
   if (loading) return <Layout><div className="loading-spinner">Loading discussion...</div></Layout>;
   if (!post) return <Layout><div className="card">Post not found</div></Layout>;
 
-  const isAuthor = user && user.id === post.user_id;
+  const isAuthor = !!(user && user.id === post.user_id);
   const isModerator = authService.isModerator();
 
   return (

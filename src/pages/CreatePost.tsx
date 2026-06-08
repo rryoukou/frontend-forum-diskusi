@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import postService from '../services/postService';
+import authService from '../services/authService';
 import categoryService from '../services/categoryService';
 import tagService from '../services/tagService';
 import type { Category, Tag } from '../types/index';
@@ -19,6 +20,10 @@ const CreatePost: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
+  const user = authService.getCurrentUser();
+  const minPoints = 10;
+  const isEligible = (user?.reputation_points ?? 0) >= minPoints || authService.isModerator();
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -29,7 +34,7 @@ const CreatePost: React.FC = () => {
         setCategories(categoriesData);
         setTags(tagsData);
         if (categoriesData.length > 0) setCategoryId(categoriesData[0].id.toString());
-      } catch (err) {
+      } catch {
         console.error('Failed to fetch data');
       }
     };
@@ -38,6 +43,10 @@ const CreatePost: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isEligible) {
+      setError(`You need at least ${minPoints} reputation points to create a post.`);
+      return;
+    }
     setLoading(true);
     setError('');
     try {
@@ -48,8 +57,9 @@ const CreatePost: React.FC = () => {
         tags: selectedTags
       });
       navigate('/');
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to create post');
+    } catch (err: unknown) {
+      const errorMessage = (err as any).response?.data?.message || 'Failed to create post';
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -88,7 +98,25 @@ const CreatePost: React.FC = () => {
 
         {error && <div className="error-message">{error}</div>}
 
-        <div className="card">
+        {!isEligible && (
+          <div className="card" style={{ borderLeft: '4px solid #ef4444', backgroundColor: '#fef2f2' }}>
+            <div style={{ display: 'flex', gap: 'var(--spacing-4)', alignItems: 'center' }}>
+              <div style={{ fontSize: '2rem' }}>⚠️</div>
+              <div>
+                <h3 style={{ color: '#991b1b', margin: 0 }}>Insufficient Reputation</h3>
+                <p style={{ color: '#b91c1c', marginTop: 'var(--spacing-1)' }}>
+                  You need at least <strong>{minPoints} reputation points</strong> to create a post. 
+                  Currently, you have <strong>{user?.reputation_points ?? 0} points</strong>.
+                </p>
+                <p style={{ fontSize: '0.875rem', color: '#dc2626', marginTop: 'var(--spacing-2)' }}>
+                  You can earn points by commenting on other posts and getting likes.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <div className="card" style={{ opacity: isEligible ? 1 : 0.6, pointerEvents: isEligible ? 'auto' : 'none' }}>
           <form onSubmit={handleSubmit}>
             <div className="form-group">
               <label className="form-label">Title</label>
@@ -99,6 +127,7 @@ const CreatePost: React.FC = () => {
                 required 
                 placeholder="What's on your mind?"
                 style={{ fontSize: '1.25rem', fontWeight: '600' }}
+                disabled={!isEligible}
               />
             </div>
 
@@ -108,6 +137,7 @@ const CreatePost: React.FC = () => {
                 value={categoryId} 
                 onChange={(e) => setCategoryId(e.target.value)}
                 required
+                disabled={!isEligible}
               >
                 {categories.map(cat => (
                   <option key={cat.id} value={cat.id}>{cat.name}</option>
@@ -124,7 +154,7 @@ const CreatePost: React.FC = () => {
                 padding: 'var(--spacing-2)', 
                 border: '1px solid var(--border-color)', 
                 borderRadius: 'var(--radius)',
-                backgroundColor: 'white',
+                backgroundColor: isEligible ? 'white' : '#f9fafb',
                 minHeight: '42px',
                 alignItems: 'center'
               }}>
@@ -142,6 +172,7 @@ const CreatePost: React.FC = () => {
                       type="button" 
                       onClick={() => removeTag(tag)}
                       style={{ border: 'none', background: 'none', color: 'white', cursor: 'pointer', padding: 0, fontSize: '1rem', lineHeight: 1 }}
+                      disabled={!isEligible}
                     >
                       ×
                     </button>
@@ -153,7 +184,8 @@ const CreatePost: React.FC = () => {
                   onChange={(e) => setTagInput(e.target.value)}
                   onKeyDown={handleTagKeyDown}
                   placeholder={selectedTags.length === 0 ? "Type tag and press Enter..." : ""}
-                  style={{ border: 'none', outline: 'none', flex: 1, minWidth: '120px', padding: 0, height: 'auto' }}
+                  style={{ border: 'none', outline: 'none', flex: 1, minWidth: '120px', padding: 0, height: 'auto', backgroundColor: 'transparent' }}
+                  disabled={!isEligible}
                 />
               </div>
               <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: 'var(--spacing-1)' }}>
@@ -172,6 +204,7 @@ const CreatePost: React.FC = () => {
                         onClick={() => handleTagToggle(tag.name)}
                         className="tag-badge"
                         style={{ cursor: 'pointer', fontSize: '0.7rem', border: '1px solid #e5e7eb', backgroundColor: '#f9fafb' }}
+                        disabled={!isEligible}
                       >
                         +{tag.name}
                       </button>
@@ -190,6 +223,7 @@ const CreatePost: React.FC = () => {
                 rows={12}
                 placeholder="Write your post content here..."
                 style={{ resize: 'vertical' }}
+                disabled={!isEligible}
               />
             </div>
 
@@ -197,7 +231,7 @@ const CreatePost: React.FC = () => {
               <button type="button" className="btn btn-outline" onClick={() => navigate(-1)}>
                 Cancel
               </button>
-              <button type="submit" className="btn btn-primary" disabled={loading}>
+              <button type="submit" className="btn btn-primary" disabled={loading || !isEligible}>
                 {loading ? 'Publishing...' : 'Publish Post'}
               </button>
             </div>

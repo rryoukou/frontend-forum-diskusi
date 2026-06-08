@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Layout from '../layouts/Layout';
 import notificationService from '../services/notificationService';
-import { Link } from 'react-router-dom';
 
 const NotificationPage: React.FC = () => {
   const [notifications, setNotifications] = useState<any[]>([]);

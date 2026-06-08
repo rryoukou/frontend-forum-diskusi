@@ -8,7 +8,6 @@ const Navbar: React.FC = () => {
   const navigate = useNavigate();
   const [unreadCount, setUnreadCount] = useState(0);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
   const user = authService.getCurrentUser();
   const isAdmin = authService.isAdmin();
   const isModerator = authService.isModerator();
@@ -44,14 +43,6 @@ const Navbar: React.FC = () => {
   };
 
   const toggleDrawer = () => setIsDrawerOpen(!isDrawerOpen);
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
-      setSearchQuery('');
-    }
-  };
 
   return (
     <>
