@@ -3,177 +3,134 @@ import AdminLayout from '../../layouts/AdminLayout';
 import userService from '../../services/userService';
 import moderationService from '../../services/moderationService';
 import type { User } from '../../types/index';
+import { Users, FileText, AlertTriangle, TrendingUp, ShieldAlert, ShieldCheck } from 'lucide-react';
+import '../../App.css';
 
 const AdminDashboard: React.FC = () => {
-  const [users, setUsers] = useState<User[]>([]);
+  const [users, setUsers]   = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState({ totalUsers: 0, totalPosts: 0, activeReports: 0 });
+  const [stats, setStats]   = useState({ totalUsers: 0, totalPosts: 0, activeReports: 0 });
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const usersData = await userService.getAdminUsers();
-        setUsers(usersData.data);
-        setStats({
-          totalUsers: usersData.total,
-          totalPosts: 20, // Mock for now
-          activeReports: 5 // Mock for now
-        });
-      } catch (error) {
-        console.error('Failed to fetch admin data', error);
-      } finally {
-        setLoading(false);
-      }
+        const ud = await userService.getAdminUsers();
+        setUsers(ud.data);
+        setStats({ totalUsers: ud.total, totalPosts: 20, activeReports: 5 });
+      } catch (err) { console.error('Failed to fetch admin data', err); }
+      finally { setLoading(false); }
     };
     fetchData();
   }, []);
 
-  const handleRoleChange = async (userId: string, currentRoles: any[]) => {
+  const refreshUsers = async () => { const ud = await userService.getAdminUsers(); setUsers(ud.data); };
+
+  const handleRoleChange = async (userId: string, currentRoles: { id: string; name: string }[]) => {
     const isMod = currentRoles.some(r => r.name === 'moderator');
-    const newRole = isMod ? ['user'] : ['user', 'moderator'];
-    
     if (window.confirm(`Change role to ${isMod ? 'Regular User' : 'Moderator'}?`)) {
-      try {
-        await userService.updateUserRoles(userId, newRole);
-        // Refresh list
-        const updatedUsers = await userService.getAdminUsers();
-        setUsers(updatedUsers.data);
-      } catch (err) {
-        alert('Failed to update role');
-      }
+      try { await userService.updateUserRoles(userId, isMod ? ['user'] : ['user', 'moderator']); await refreshUsers(); }
+      catch { alert('Failed to update role'); }
     }
   };
-
-  const handleBanUser = async (userId: string) => {
-    const reason = window.prompt('Enter reason for banning this user:');
-    if (!reason) return;
-    try {
-      await moderationService.banUser(userId, reason);
-      alert('User banned successfully');
-      // Refresh list
-      const usersData = await userService.getAdminUsers();
-      setUsers(usersData.data);
-    } catch (error) {
-      console.error('Ban failed');
-    }
-  };
-
-  const handleUnbanUser = async (userId: string) => {
-    const reason = window.prompt('Enter reason for unbanning this user:');
-    if (!reason) return;
-    try {
-      await moderationService.unbanUser(userId, reason);
-      alert('User unbanned successfully');
-      // Refresh list
-      const usersData = await userService.getAdminUsers();
-      setUsers(usersData.data);
-    } catch (error) {
-      console.error('Unban failed');
-    }
-  };
-
-  const handleWarnUser = async (userId: string) => {
-    const reason = window.prompt('Enter warning reason:');
-    if (!reason) return;
-    try {
-      await moderationService.warnUser(userId, reason);
-      alert('Warning sent successfully');
-    } catch (error) {
-      console.error('Warning failed');
-    }
-  };
+  const handleBanUser   = async (userId: string) => { const r = window.prompt('Ban reason:'); if (!r) return; try { await moderationService.banUser(userId, r); await refreshUsers(); } catch { console.error('Ban failed'); } };
+  const handleUnbanUser = async (userId: string) => { const r = window.prompt('Unban reason:'); if (!r) return; try { await moderationService.unbanUser(userId, r); await refreshUsers(); } catch { console.error('Unban failed'); } };
+  const handleWarnUser  = async (userId: string) => { const r = window.prompt('Warning reason:'); if (!r) return; try { await moderationService.warnUser(userId, r); alert('Warning sent.'); } catch { console.error('Warning failed'); } };
 
   return (
     <AdminLayout>
-      <h1>Admin Dashboard</h1>
-      
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', marginTop: '2rem', marginBottom: '3rem' }}>
-        <div style={{ padding: '1.5rem', backgroundColor: '#fff', border: '1px solid #ddd', borderRadius: '8px' }}>
-          <h3>Total Users</h3>
-          <p style={{ fontSize: '2rem', margin: 0 }}>{stats.totalUsers}</p>
+      <div style={{ marginBottom: 'var(--sp-6)' }}>
+        <h1 style={{ margin: 0 }}>Admin Dashboard</h1>
+        <p style={{ color: 'var(--text-3)', fontSize: '0.9rem', marginTop: 4 }}>Manage users, roles, and platform activity.</p>
+      </div>
+
+      <div className="admin-stats-grid">
+        <div className="admin-stat-card">
+          <span className="admin-stat-icon"><Users size={28} strokeWidth={1.8} style={{ color: 'var(--primary)' }} /></span>
+          <span className="admin-stat-value">{stats.totalUsers}</span>
+          <span className="admin-stat-label">Total Users</span>
         </div>
-        <div style={{ padding: '1.5rem', backgroundColor: '#fff', border: '1px solid #ddd', borderRadius: '8px' }}>
-          <h3>Total Posts</h3>
-          <p style={{ fontSize: '2rem', margin: 0 }}>{stats.totalPosts}</p>
+        <div className="admin-stat-card success">
+          <span className="admin-stat-icon"><FileText size={28} strokeWidth={1.8} style={{ color: 'var(--success)' }} /></span>
+          <span className="admin-stat-value">{stats.totalPosts}</span>
+          <span className="admin-stat-label">Total Posts</span>
         </div>
-        <div style={{ padding: '1.5rem', backgroundColor: '#fff', border: '1px solid #ddd', borderRadius: '8px' }}>
-          <h3>Active Reports</h3>
-          <p style={{ fontSize: '2rem', color: 'red', margin: 0 }}>{stats.activeReports}</p>
+        <div className="admin-stat-card danger">
+          <span className="admin-stat-icon"><AlertTriangle size={28} strokeWidth={1.8} style={{ color: 'var(--danger)' }} /></span>
+          <span className="admin-stat-value" style={{ color: 'var(--danger)' }}>{stats.activeReports}</span>
+          <span className="admin-stat-label">Active Reports</span>
         </div>
       </div>
 
-      <h2>User Management</h2>
-      {loading ? <p>Loading users...</p> : (
-        <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '1rem', backgroundColor: '#fff' }}>
-          <thead>
-            <tr style={{ backgroundColor: '#f8f9fa', textAlign: 'left' }}>
-              <th style={{ padding: '1rem', borderBottom: '2px solid #dee2e6' }}>Username</th>
-              <th style={{ padding: '1rem', borderBottom: '2px solid #dee2e6' }}>Email</th>
-              <th style={{ padding: '1rem', borderBottom: '2px solid #dee2e6' }}>Roles</th>
-              <th style={{ padding: '1rem', borderBottom: '2px solid #dee2e6' }}>Joined</th>
-              <th style={{ padding: '1rem', borderBottom: '2px solid #dee2e6' }}>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {users.map(user => (
-              <tr key={user.id}>
-                <td style={{ padding: '1rem', borderBottom: '1px solid #dee2e6' }}>{user.username}</td>
-                <td style={{ padding: '1rem', borderBottom: '1px solid #dee2e6' }}>{user.email}</td>
-                <td style={{ padding: '1rem', borderBottom: '1px solid #dee2e6' }}>
-                  {user.roles?.map(r => (
-                    <span key={r.id} style={{ 
-                      backgroundColor: r.name === 'admin' ? '#ffc107' : r.name === 'moderator' ? '#17a2b8' : '#6c757d',
-                      color: '#fff',
-                      padding: '0.2rem 0.5rem',
-                      borderRadius: '4px',
-                      fontSize: '0.8rem',
-                      marginRight: '0.3rem'
-                    }}>
-                      {r.name}
-                    </span>
-                  ))}
-                </td>
-                <td style={{ padding: '1rem', borderBottom: '1px solid #dee2e6' }}>{new Date(user.created_at).toLocaleDateString()}</td>
-                <td style={{ padding: '1rem', borderBottom: '1px solid #dee2e6' }}>
-                  {user.roles?.some(r => r.name === 'admin') ? (
-                    <span style={{ color: '#999', fontSize: '0.9rem' }}>Immutable</span>
-                  ) : (
-                    <div style={{ display: 'flex', gap: '0.5rem' }}>
-                      <button 
-                        onClick={() => handleRoleChange(user.id, user.roles || [])}
-                        style={{ padding: '0.3rem 0.6rem', cursor: 'pointer' }}
-                      >
-                        {user.roles?.some(r => r.name === 'moderator') ? 'Demote' : 'Promote Mod'}
-                      </button>
-                      <button 
-                        onClick={() => handleWarnUser(user.id)}
-                        style={{ padding: '0.3rem 0.6rem', cursor: 'pointer', backgroundColor: '#fffbe6', color: '#b45309', border: '1px solid #ffe58f' }}
-                      >
-                        Warn
-                      </button>
-                      {user.is_banned ? (
-                        <button 
-                          onClick={() => handleUnbanUser(user.id)}
-                          style={{ padding: '0.3rem 0.6rem', cursor: 'pointer', backgroundColor: '#e6f7ff', color: '#1890ff', border: '1px solid #91d5ff' }}
-                        >
-                          Unban
-                        </button>
+      <div className="admin-table-card">
+        <div className="admin-table-header">
+          <h2>User Management</h2>
+          <span style={{ fontSize: '0.82rem', color: 'var(--text-3)' }}>{users.length} users</span>
+        </div>
+
+        {loading ? (
+          <div className="loading-spinner">Loading users...</div>
+        ) : (
+          <div style={{ overflowX: 'auto' }}>
+            <table className="admin-table">
+              <thead>
+                <tr>
+                  <th>User</th><th>Email</th><th>Roles</th><th>Joined</th><th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {users.map(user => (
+                  <tr key={user.id}>
+                    <td>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-3)' }}>
+                        <div style={{ width: 34, height: 34, borderRadius: '50%', background: 'var(--gradient-primary)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.875rem', fontWeight: 700, flexShrink: 0 }}>
+                          {user.username.charAt(0).toUpperCase()}
+                        </div>
+                        <span style={{ fontWeight: 600 }}>{user.username}</span>
+                        {user.is_banned && (
+                          <span style={{ fontSize: '0.65rem', fontWeight: 700, padding: '0.15rem 0.5rem', borderRadius: 'var(--radius-full)', background: 'var(--danger-light)', color: 'var(--danger)' }}>
+                            BANNED
+                          </span>
+                        )}
+                      </div>
+                    </td>
+                    <td style={{ color: 'var(--text-2)', fontSize: '0.875rem' }}>{user.email}</td>
+                    <td>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+                        {user.roles?.map(r => <span key={r.id} className={`admin-role-badge ${r.name}`}>{r.name}</span>)}
+                      </div>
+                    </td>
+                    <td style={{ color: 'var(--text-3)', fontSize: '0.82rem' }}>{new Date(user.created_at).toLocaleDateString()}</td>
+                    <td>
+                      {user.roles?.some(r => r.name === 'admin') ? (
+                        <span style={{ color: 'var(--text-3)', fontSize: '0.82rem' }}>Immutable</span>
                       ) : (
-                        <button 
-                          onClick={() => handleBanUser(user.id)}
-                          style={{ padding: '0.3rem 0.6rem', cursor: 'pointer', backgroundColor: '#fff1f0', color: '#ef4444', border: '1px solid #ffa39e' }}
-                        >
-                          Ban
-                        </button>
+                        <div className="admin-action-group">
+                          <button onClick={() => handleRoleChange(user.id, user.roles || [])} className="admin-action-btn promote">
+                            <TrendingUp size={12} strokeWidth={2.5} />
+                            {user.roles?.some(r => r.name === 'moderator') ? 'Demote' : 'Make Mod'}
+                          </button>
+                          <button onClick={() => handleWarnUser(user.id)} className="admin-action-btn warn">
+                            <AlertTriangle size={12} strokeWidth={2.5} /> Warn
+                          </button>
+                          {user.is_banned ? (
+                            <button onClick={() => handleUnbanUser(user.id)} className="admin-action-btn unban">
+                              <ShieldCheck size={12} strokeWidth={2.5} /> Unban
+                            </button>
+                          ) : (
+                            <button onClick={() => handleBanUser(user.id)} className="admin-action-btn ban">
+                              <ShieldAlert size={12} strokeWidth={2.5} /> Ban
+                            </button>
+                          )}
+                        </div>
                       )}
-                    </div>
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
     </AdminLayout>
   );
 };

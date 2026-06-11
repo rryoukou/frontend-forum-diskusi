@@ -3,36 +3,32 @@ import { useNavigate } from 'react-router-dom';
 import userService from '../services/userService';
 import authService from '../services/authService';
 import Layout from '../layouts/Layout';
-import './Auth.css';
+import { Camera, Check, X } from 'lucide-react';
+import './EditProfile.css';
 
 const EditProfile: React.FC = () => {
-  const [bio, setBio] = useState('');
-  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [bio, setBio]                     = useState('');
+  const [avatarFile, setAvatarFile]       = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [fetching, setFetching] = useState(true);
-  const [error, setError] = useState('');
+  const [loading, setLoading]             = useState(false);
+  const [fetching, setFetching]           = useState(true);
+  const [error, setError]                 = useState('');
   const navigate = useNavigate();
   const user = authService.getCurrentUser();
 
   useEffect(() => {
-    if (!user) {
-      navigate('/login');
-      return;
-    }
-
+    if (!user) { navigate('/login'); return; }
     const fetchProfile = async () => {
       try {
-        const profile = await userService.getProfile(user.username);
-        setBio(profile.bio || '');
-        setAvatarPreview(profile.avatar_url || '');
-      } catch (err) {
+        const p = await userService.getProfile(user.username);
+        setBio(p.bio || '');
+        setAvatarPreview(p.avatar_url || '');
+      } catch {
         console.error('Failed to fetch profile');
       } finally {
         setFetching(false);
       }
     };
-
     fetchProfile();
   }, [user, navigate]);
 
@@ -49,11 +45,7 @@ const EditProfile: React.FC = () => {
     setLoading(true);
     setError('');
     try {
-      await userService.updateProfile({ 
-        bio, 
-        avatar: avatarFile || undefined 
-      });
-      
+      await userService.updateProfile({ bio, avatar: avatarFile || undefined });
       const updatedUser = await authService.me();
       localStorage.setItem('user', JSON.stringify(updatedUser));
       navigate(`/profiles/${user?.username}`);
@@ -68,82 +60,116 @@ const EditProfile: React.FC = () => {
 
   return (
     <Layout>
-      <div style={{ maxWidth: '600px', margin: '0 auto' }}>
-        <h1 style={{ marginBottom: 'var(--spacing-8)' }}>Edit Profile</h1>
+      <div className="edit-profile-wrapper">
+        <div className="edit-profile-title-area">
+          <h1>Edit Profile</h1>
+          <p>Update your public profile information.</p>
+        </div>
 
-        {error && <div className="error-message">{error}</div>}
+        {error && (
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 'var(--sp-2)',
+            padding: 'var(--sp-3) var(--sp-4)',
+            background: 'var(--danger-light)',
+            border: '1px solid rgba(255, 77, 106, 0.25)',
+            borderRadius: 'var(--radius)',
+            color: 'var(--danger)',
+            fontSize: '0.875rem',
+            fontWeight: 500,
+            marginBottom: 'var(--sp-5)'
+          }}>
+            {error}
+          </div>
+        )}
 
-        <div className="card">
-          <form onSubmit={handleSubmit}>
-            <div className="form-group" style={{ textAlign: 'center', marginBottom: 'var(--spacing-6)' }}>
-              <label className="form-label" style={{ display: 'block', textAlign: 'left' }}>Profile Picture</label>
-              
-              <div style={{ position: 'relative', display: 'inline-block', marginTop: 'var(--spacing-4)' }}>
-                <img 
-                  src={avatarPreview || 'https://ui-avatars.com/api/?name=' + user?.username} 
-                  alt="Preview" 
-                  style={{ 
-                    width: '120px', 
-                    height: '120px', 
-                    borderRadius: '50%', 
-                    objectFit: 'cover',
-                    border: '4px solid var(--primary-color)',
-                    backgroundColor: '#f3f4f6'
-                  }} 
+        <div className="edit-profile-card">
+          <form className="edit-profile-form" onSubmit={handleSubmit}>
+            
+            {/* ── Left Column: Avatar Section ── */}
+            <div className="edit-profile-avatar-sec">
+              <div className="edit-profile-avatar-preview">
+                <img
+                  src={avatarPreview || `https://ui-avatars.com/api/?name=${user?.username}&background=00d084&color=0d0d0d&size=130`}
+                  alt="Profile preview"
                 />
-                <input 
-                  type="file" 
+                <input
+                  type="file"
                   id="avatar-upload"
                   onChange={handleFileChange}
                   accept="image/*"
                   style={{ display: 'none' }}
                 />
-                <label 
-                  htmlFor="avatar-upload" 
-                  style={{ 
-                    position: 'absolute',
-                    bottom: '0',
-                    right: '0',
-                    backgroundColor: 'var(--primary-color)',
-                    color: 'white',
-                    padding: 'var(--spacing-2)',
-                    borderRadius: '50%',
-                    cursor: 'pointer',
-                    boxShadow: '0 2px 10px rgba(0,0,0,0.2)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    width: '32px',
-                    height: '32px'
-                  }}
-                >
-                  📷
+                <label htmlFor="avatar-upload" className="edit-profile-avatar-btn" title="Upload photo">
+                  <Camera size={15} strokeWidth={2.5} />
                 </label>
               </div>
-              <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: 'var(--spacing-2)' }}>
-                Click the camera icon to upload a new photo.
+              <p className="edit-profile-avatar-hint">
+                Click the camera icon to upload a new photo.<br />
+                JPG, PNG or GIF · max 2 MB
               </p>
             </div>
 
-            <div className="form-group">
-              <label className="form-label">Bio</label>
-              <textarea 
-                value={bio} 
-                onChange={(e) => setBio(e.target.value)} 
-                rows={5}
-                placeholder="Tell us about yourself..."
-                style={{ resize: 'vertical' }}
-              />
+            {/* ── Right Column: Info & Bio Section ── */}
+            <div className="edit-profile-fields-sec">
+              {/* Username */}
+              <div className="form-group">
+                <label className="form-label">Username</label>
+                <input
+                  type="text"
+                  value={user?.username || ''}
+                  disabled
+                  title="Username cannot be changed"
+                  style={{
+                    opacity: 0.65,
+                    cursor: 'not-allowed',
+                    background: 'rgba(255,255,255,0.02)'
+                  }}
+                />
+              </div>
+
+              {/* Email Address */}
+              <div className="form-group">
+                <label className="form-label">Email Address</label>
+                <input
+                  type="text"
+                  value={user?.email || ''}
+                  disabled
+                  title="Email address cannot be changed"
+                  style={{
+                    opacity: 0.65,
+                    cursor: 'not-allowed',
+                    background: 'rgba(255,255,255,0.02)'
+                  }}
+                />
+              </div>
+
+              {/* Bio */}
+              <div className="form-group">
+                <label className="form-label">Bio</label>
+                <textarea
+                  value={bio}
+                  onChange={e => setBio(e.target.value)}
+                  maxLength={500}
+                  placeholder="Tell the community about yourself..."
+                />
+                <span className="edit-profile-char-counter">
+                  {bio.length}/500 characters
+                </span>
+              </div>
             </div>
 
-            <div style={{ display: 'flex', gap: 'var(--spacing-4)', justifyContent: 'flex-end', marginTop: 'var(--spacing-6)' }}>
+            {/* ── Full Width Footer Actions ── */}
+            <div className="edit-profile-actions-bar">
               <button type="button" className="btn btn-outline" onClick={() => navigate(-1)}>
-                Cancel
+                <X size={14} strokeWidth={2.5} /> Cancel
               </button>
               <button type="submit" className="btn btn-primary" disabled={loading}>
-                {loading ? 'Saving...' : 'Save Changes'}
+                {loading ? 'Saving...' : <><Check size={14} strokeWidth={2.5} /> Save Changes</>}
               </button>
             </div>
+
           </form>
         </div>
       </div>

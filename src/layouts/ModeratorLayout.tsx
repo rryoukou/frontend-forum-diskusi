@@ -1,16 +1,36 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Navbar from '../components/Navbar';
+import Sidebar from '../components/Sidebar';
 
 interface ModeratorLayoutProps {
   children: React.ReactNode;
 }
 
 const ModeratorLayout: React.FC<ModeratorLayoutProps> = ({ children }) => {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#f0f2f5' }}>
-      <Navbar />
-      <main style={{ padding: '2rem', maxWidth: '1000px', margin: '0 auto' }}>
-        <div style={{ backgroundColor: '#fff', padding: '2rem', borderRadius: '8px', boxShadow: '0 2px 10px rgba(0,0,0,0.05)' }}>
+    <div className="layout-wrapper" style={{ background: 'var(--bg)' }}>
+      <Navbar onOpenSidebar={() => setSidebarOpen(true)} />
+      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      <main
+        style={{
+          padding: 'var(--sp-8) var(--sp-6)',
+          maxWidth: '1040px',
+          margin: '0 auto',
+          flex: 1,
+        }}
+      >
+        <div
+          style={{
+            background: 'var(--surface)',
+            borderRadius: 'var(--radius-lg)',
+            border: '1px solid var(--border)',
+            boxShadow: 'var(--shadow)',
+            padding: 'var(--sp-8)',
+            minHeight: '60vh',
+          }}
+        >
           {children}
         </div>
       </main>

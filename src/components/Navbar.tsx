@@ -1,183 +1,237 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import authService from '../services/authService';
+import * as Avatar from '@radix-ui/react-avatar';
+import { logoutUser } from '../store/authSlice';
+import { useAppDispatch, useAppSelector } from '../store/hooks';
 import notificationService from '../services/notificationService';
+import authService from '../services/authService';
+import { useAuthModal } from '../context/AuthModalContext';
+import { useConfirm } from '../context/ConfirmContext';
+import { LogoBrand } from './Logo';
+import {
+  Home, Trophy, Search, PenLine, User, Bookmark,
+  Bell, TrendingUp, Flag, ScrollText, Users, FolderOpen,
+  LogOut, Menu, X,
+} from 'lucide-react';
 import './Navbar.css';
 
-const Navbar: React.FC = () => {
+interface NavbarProps {
+  onOpenSidebar?: () => void;
+}
+
+const Navbar: React.FC<NavbarProps> = ({ onOpenSidebar }) => {
   const navigate = useNavigate();
+  const dispatch = useAppDispatch();
+  const { user } = useAppSelector((s) => s.auth);
+  const { openLogin, openRegister } = useAuthModal();
+  const { confirm, alert: customAlert } = useConfirm();
+
   const [unreadCount, setUnreadCount] = useState(0);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const user = authService.getCurrentUser();
-  const isAdmin = authService.isAdmin();
+
+  // Role helpers still use authService (reads localStorage, stays consistent)
+  const isAdmin     = authService.isAdmin();
   const isModerator = authService.isModerator();
 
   useEffect(() => {
-    if (user) {
-      const fetchUnread = async () => {
-        try {
-          const count = await notificationService.getUnreadCount();
-          setUnreadCount(count);
-        } catch (err: any) {
-          if (err.response?.status === 401) {
-            // Stop polling if unauthorized
-            clearInterval(interval);
-          }
-          console.error('Failed to fetch unread count');
+    if (!user) return;
+    const fetchUnread = async () => {
+      try {
+        const count = await notificationService.getUnreadCount();
+        setUnreadCount(count);
+      } catch (err: unknown) {
+        if ((err as { response?: { status?: number } }).response?.status === 401) {
+          clearInterval(interval);
         }
-      };
-      fetchUnread();
-      const interval = setInterval(fetchUnread, 30000);
-      return () => clearInterval(interval);
-    }
+      }
+    };
+    fetchUnread();
+    const interval = setInterval(fetchUnread, 30000);
+    return () => clearInterval(interval);
   }, [user]);
 
   const handleLogout = async () => {
+    const confirmLogout = await confirm('Konfirmasi Logout', 'Apakah Anda yakin ingin keluar dari akun Anda?');
+    if (!confirmLogout) return;
+
     try {
-      await authService.logout();
-      setIsDrawerOpen(false);
-      navigate('/login');
-    } catch (error) {
-      console.error('Logout failed', error);
+      const resultAction = await dispatch(logoutUser());
+      if (logoutUser.fulfilled.match(resultAction)) {
+        setIsDrawerOpen(false);
+        await customAlert('Logout Berhasil', 'Anda telah berhasil keluar dari akun.', 'success');
+        navigate('/login');
+      } else {
+        await customAlert('Logout Gagal', 'Logout belum berhasil. Silakan coba lagi.', 'error');
+      }
+    } catch {
+      await customAlert('Logout Gagal', 'Logout belum berhasil. Terjadi kesalahan sistem.', 'error');
     }
   };
 
-  const toggleDrawer = () => setIsDrawerOpen(!isDrawerOpen);
+  const closeDrawer = () => setIsDrawerOpen(false);
+  const toggleDrawer = () => setIsDrawerOpen((v) => !v);
 
   return (
     <>
-      <nav className="navbar">
+      <nav className="navbar" role="navigation" aria-label="Main navigation">
         <div className="container navbar-container">
-          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-4)', flex: 1 }}>
+          {/* Left */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-3)', flex: 1 }}>
             {user && (
-              <button 
-                onClick={toggleDrawer}
-                className="btn btn-outline"
-                style={{ padding: 'var(--spacing-2)', border: 'none' }}
+              <button
+                onClick={() => {
+                  if (onOpenSidebar) {
+                    onOpenSidebar();
+                  } else {
+                    toggleDrawer();
+                  }
+                }}
+                className="hamburger-btn"
+                aria-label={isDrawerOpen ? 'Close menu' : 'Open menu'}
+                aria-expanded={isDrawerOpen}
+                aria-controls="nav-drawer"
               >
-                <span style={{ fontSize: '1.5rem' }}>☰</span>
+                {isDrawerOpen ? <X size={18} strokeWidth={2} /> : <Menu size={18} strokeWidth={2} />}
               </button>
             )}
-            <Link to="/" className="navbar-brand">
-              <span>💬</span> Forum Diskusi
+            <Link to="/" className="navbar-brand" aria-label="SuaraKita — Home">
+              <LogoBrand size={60} showText={true} />
             </Link>
           </div>
 
+          {/* Right */}
           <div className="navbar-actions">
             {user ? (
               <>
-                <Link to="/notifications" style={{ position: 'relative', fontSize: '1.25rem' }}>
-                  🔔
+                <Link to="/notifications" className="nav-icon-btn" aria-label={`Notifications${unreadCount > 0 ? `, ${unreadCount} unread` : ''}`}>
+                  <Bell size={18} strokeWidth={2} />
                   {unreadCount > 0 && (
-                    <span className="notification-badge">
+                    <span className="notification-badge" aria-hidden="true">
                       {unreadCount > 9 ? '9+' : unreadCount}
                     </span>
                   )}
                 </Link>
-                <Link to={`/profiles/${user.username}`} className="nav-link" style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-2)' }}>
-                  <div style={{ 
-                    width: '32px', 
-                    height: '32px', 
-                    borderRadius: '50%', 
-                    backgroundColor: 'var(--primary-color)', 
-                    color: 'white', 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    justifyContent: 'center',
-                    fontWeight: 'bold',
-                    fontSize: '0.875rem'
-                  }}>
-                    {user.username.charAt(0).toUpperCase()}
-                  </div>
-                  <span>{user.username}</span>
+                <Link to={`/profiles/${user.username}`} className="nav-user-btn" aria-label={`Profile: ${user.username}`}>
+                  <Avatar.Root className="nav-avatar">
+                    <Avatar.Image
+                      src={user.avatar_url ?? undefined}
+                      alt={user.username}
+                    />
+                    <Avatar.Fallback delayMs={200}>
+                      {user.username.charAt(0).toUpperCase()}
+                    </Avatar.Fallback>
+                  </Avatar.Root>
+                  <span className="nav-username-text">{user.username}</span>
                 </Link>
               </>
             ) : (
-              <div style={{ display: 'flex', gap: 'var(--spacing-3)' }}>
-                <Link to="/login" className="btn btn-outline">Login</Link>
-                <Link to="/register" className="btn btn-primary">Register</Link>
+              <div style={{ display: 'flex', gap: 'var(--sp-2)' }}>
+                <button onClick={openLogin}    className="btn btn-outline btn-sm">Login</button>
+                <button onClick={openRegister} className="btn btn-primary  btn-sm">Register</button>
               </div>
             )}
           </div>
         </div>
       </nav>
 
-      {/* Navigation Drawer Overlay */}
-      {isDrawerOpen && <div className="drawer-overlay" onClick={toggleDrawer} />}
+      {/* Overlay */}
+      {isDrawerOpen && (
+        <div
+          className="drawer-overlay"
+          onClick={closeDrawer}
+          aria-hidden="true"
+        />
+      )}
 
-      {/* Navigation Drawer Content */}
-      <div className={`drawer-content ${isDrawerOpen ? 'open' : ''}`}>
+      {/* Drawer */}
+      <div
+        id="nav-drawer"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Navigation drawer"
+        className={`drawer-content${isDrawerOpen ? ' open' : ''}`}
+      >
         <div className="drawer-header">
-          <h2 style={{ margin: 0 }}>Menu</h2>
-          <button onClick={toggleDrawer} className="btn btn-outline" style={{ border: 'none', fontSize: '1.5rem' }}>×</button>
+          <h2>Navigation</h2>
+          <button onClick={closeDrawer} className="btn-ghost drawer-close-btn" aria-label="Close menu">
+            <X size={16} strokeWidth={2.5} />
+          </button>
         </div>
 
         {user && (
-          <div style={{ 
-            marginBottom: 'var(--spacing-6)', 
-            padding: 'var(--spacing-4)', 
-            backgroundColor: 'var(--bg-color)', 
-            borderRadius: 'var(--radius)',
-            border: '1px solid var(--border-color)'
-          }}>
-            <div style={{ fontWeight: 'bold', fontSize: '1.1rem' }}>{user.username}</div>
-            <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Level {user.level} • {user.reputation_points} Points</div>
+          <div className="drawer-user-card">
+            <Avatar.Root className="drawer-user-avatar">
+              <Avatar.Image src={user.avatar_url ?? undefined} alt={user.username} />
+              <Avatar.Fallback delayMs={200}>
+                {user.username.charAt(0).toUpperCase()}
+              </Avatar.Fallback>
+            </Avatar.Root>
+            <div>
+              <div className="username">{user.username}</div>
+              <div className="user-meta">Lv {user.level} · {user.reputation_points?.toLocaleString()} pts</div>
+            </div>
           </div>
         )}
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-1)', flex: 1, overflowY: 'auto' }}>
-          <div style={{ color: 'var(--text-muted)', fontSize: '0.75rem', fontWeight: 'bold', textTransform: 'uppercase', padding: '0 var(--spacing-4)', marginBottom: 'var(--spacing-2)', marginTop: 'var(--spacing-4)' }}>
-            User Menu
-          </div>
-          <DrawerLink to="/" onClick={toggleDrawer}>🏠 Home</DrawerLink>
-          <DrawerLink to="/leaderboard" onClick={toggleDrawer}>🏆 Leaderboard</DrawerLink>
-          <DrawerLink to="/reputation-history" onClick={toggleDrawer}>📈 Reputation History</DrawerLink>
-          <DrawerLink to="/notifications" onClick={toggleDrawer}>🔔 Notifications</DrawerLink>
-          <DrawerLink to="/bookmarks" onClick={toggleDrawer}>🔖 Bookmarks</DrawerLink>
-          <DrawerLink to="/create-post" onClick={toggleDrawer}>✍️ Create Post</DrawerLink>
-          <DrawerLink to={`/profiles/${user?.username}`} onClick={toggleDrawer}>👤 My Profile</DrawerLink>
+        <nav className="drawer-nav" aria-label="Drawer navigation">
+          <div className="drawer-section-label">Main</div>
+          <DrawerLink to="/"            icon={<Home   size={15} strokeWidth={2} />} onClick={closeDrawer}>Home</DrawerLink>
+          <DrawerLink to="/leaderboard" icon={<Trophy size={15} strokeWidth={2} />} onClick={closeDrawer}>Leaderboard</DrawerLink>
+          <DrawerLink to="/search"      icon={<Search size={15} strokeWidth={2} />} onClick={closeDrawer}>Search</DrawerLink>
+
+          {user && (
+            <>
+              <div className="drawer-section-label">My Account</div>
+              <DrawerLink to="/create-post"                  icon={<PenLine    size={15} strokeWidth={2} />} onClick={closeDrawer}>Create Post</DrawerLink>
+              <DrawerLink to={`/profiles/${user.username}`}  icon={<User       size={15} strokeWidth={2} />} onClick={closeDrawer}>My Profile</DrawerLink>
+              <DrawerLink to="/bookmarks"                    icon={<Bookmark   size={15} strokeWidth={2} />} onClick={closeDrawer}>Bookmarks</DrawerLink>
+              <DrawerLink to="/notifications"                icon={<Bell       size={15} strokeWidth={2} />} onClick={closeDrawer}>
+                Notifications
+                {unreadCount > 0 && <span className="drawer-notif-badge">{unreadCount > 9 ? '9+' : unreadCount}</span>}
+              </DrawerLink>
+              <DrawerLink to="/reputation-history"           icon={<TrendingUp size={15} strokeWidth={2} />} onClick={closeDrawer}>Reputation</DrawerLink>
+            </>
+          )}
 
           {isModerator && (
             <>
-              <div style={{ color: 'var(--text-muted)', fontSize: '0.75rem', fontWeight: 'bold', textTransform: 'uppercase', padding: '0 var(--spacing-4)', marginBottom: 'var(--spacing-2)', marginTop: 'var(--spacing-6)' }}>
-                Moderator Menu
-              </div>
-              <DrawerLink to="/moderator" onClick={toggleDrawer}>🚩 Pending Reports</DrawerLink>
-              <DrawerLink to="/moderation-logs" onClick={toggleDrawer}>📜 Moderation Logs</DrawerLink>
+              <div className="drawer-section-label">Moderator</div>
+              <DrawerLink to="/moderator"       icon={<Flag       size={15} strokeWidth={2} />} onClick={closeDrawer}>Pending Reports</DrawerLink>
+              <DrawerLink to="/moderation-logs" icon={<ScrollText size={15} strokeWidth={2} />} onClick={closeDrawer}>Moderation Logs</DrawerLink>
             </>
           )}
 
           {isAdmin && (
             <>
-              <div style={{ color: 'var(--text-muted)', fontSize: '0.75rem', fontWeight: 'bold', textTransform: 'uppercase', padding: '0 var(--spacing-4)', marginBottom: 'var(--spacing-2)', marginTop: 'var(--spacing-6)' }}>
-                Admin Menu
-              </div>
-              <DrawerLink to="/admin" onClick={toggleDrawer}>👥 Manage Users</DrawerLink>
-              <DrawerLink to="/admin/categories" onClick={toggleDrawer}>📁 Manage Categories</DrawerLink>
+              <div className="drawer-section-label">Admin</div>
+              <DrawerLink to="/admin"            icon={<Users      size={15} strokeWidth={2} />} onClick={closeDrawer}>Manage Users</DrawerLink>
+              <DrawerLink to="/admin/categories" icon={<FolderOpen size={15} strokeWidth={2} />} onClick={closeDrawer}>Categories</DrawerLink>
             </>
           )}
-        </div>
+        </nav>
 
         {user && (
-          <button 
-            onClick={handleLogout}
-            className="btn btn-outline"
-            style={{ marginTop: 'var(--spacing-6)', color: '#ef4444', borderColor: '#fee2e2' }}
-          >
-            Logout
-          </button>
+          <div className="drawer-footer">
+            <button onClick={handleLogout} className="drawer-logout-btn" aria-label="Log out">
+              <LogOut size={15} strokeWidth={2} /> Logout
+            </button>
+          </div>
         )}
       </div>
     </>
   );
 };
 
-const DrawerLink: React.FC<{ to: string, children: React.ReactNode, onClick: () => void }> = ({ to, children, onClick }) => (
-  <Link 
-    to={to} 
-    onClick={onClick}
-    className="drawer-link"
-  >
+// ─── DrawerLink ───────────────────────────────────────────────────────────────
+
+const DrawerLink: React.FC<{
+  to: string;
+  icon: React.ReactNode;
+  children: React.ReactNode;
+  onClick: () => void;
+}> = ({ to, icon, children, onClick }) => (
+  <Link to={to} onClick={onClick} className="drawer-link">
+    <span className="drawer-link-icon" aria-hidden="true">{icon}</span>
     {children}
   </Link>
 );

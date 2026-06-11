@@ -1,26 +1,28 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Navbar from '../components/Navbar';
+import Sidebar from '../components/Sidebar';
+import Footer from '../components/Footer';
+import { useAppSelector } from '../store/hooks';
 
 interface LayoutProps {
   children: React.ReactNode;
 }
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { user } = useAppSelector((s) => s.auth);
+
   return (
     <div className="layout-wrapper">
-      <Navbar />
-      <main className="container" style={{ paddingTop: 'var(--spacing-8)', paddingBottom: 'var(--spacing-8)' }}>
+      <Navbar onOpenSidebar={user ? () => setSidebarOpen(true) : undefined} />
+      {user && <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />}
+      <main
+        className="container page-enter"
+        style={{ paddingTop: 'var(--sp-8)', paddingBottom: 'var(--sp-12)' }}
+      >
         {children}
       </main>
-      <footer style={{ 
-        textAlign: 'center', 
-        padding: 'var(--spacing-8) 0', 
-        color: 'var(--text-muted)',
-        borderTop: '1px solid var(--border-color)',
-        marginTop: 'var(--spacing-8)'
-      }}>
-        <p>&copy; 2026 Forum Diskusi. All rights reserved.</p>
-      </footer>
+      <Footer />
     </div>
   );
 };
