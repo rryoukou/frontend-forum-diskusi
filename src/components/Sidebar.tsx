@@ -4,7 +4,7 @@ import * as Avatar from '@radix-ui/react-avatar';
 import {
   Home, Trophy, Search, PenLine, User, Bookmark,
   Bell, TrendingUp, Flag, ScrollText, Users, FolderOpen,
-  LogOut, ChevronDown, X,
+  LogOut, ChevronDown, X, LayoutDashboard,
 } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { logoutUser } from '../store/authSlice';
@@ -76,7 +76,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
   };
 
   const isActive = (path: string) =>
-    path === '/' ? location.pathname === '/' : location.pathname.startsWith(path);
+    path === '/' || path === '/admin' ? location.pathname === path : location.pathname.startsWith(path);
 
   return (
     <>
@@ -205,8 +205,9 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           {isAdmin && (
             <>
               <div className="sidebar__section-label">Admin</div>
-              <SidebarLink to="/admin"            icon={<Users      size={15} />} active={isActive('/admin')}            onClick={onClose}>Manage Users</SidebarLink>
-              <SidebarLink to="/admin/categories" icon={<FolderOpen size={15} />} active={isActive('/admin/categories')} onClick={onClose}>Categories</SidebarLink>
+              <SidebarLink to="/admin"            icon={<LayoutDashboard size={15} />} active={isActive('/admin')}            onClick={onClose}>Dashboard</SidebarLink>
+              <SidebarLink to="/admin/users"      icon={<Users           size={15} />} active={isActive('/admin/users')}      onClick={onClose}>Manage Users</SidebarLink>
+              <SidebarLink to="/admin/categories" icon={<FolderOpen      size={15} />} active={isActive('/admin/categories')} onClick={onClose}>Categories</SidebarLink>
             </>
           )}
         </nav>

@@ -10,6 +10,7 @@ import PostDetail from './pages/PostDetail';
 import CategoryPosts from './pages/CategoryPosts';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminCategories from './pages/admin/AdminCategories';
+import UserManagement from './pages/admin/UserManagement';
 import ModeratorDashboard from './pages/moderator/ModeratorDashboard';
 import ModerationLogs from './pages/moderator/ModerationLogs';
 import Notifications from './pages/Notifications';
@@ -61,6 +62,11 @@ function App() {
           <Route path="/admin" element={
             <ProtectedRoute role="admin">
               <AdminDashboard />
+            </ProtectedRoute>
+          } />
+          <Route path="/admin/users" element={
+            <ProtectedRoute role="admin">
+              <UserManagement />
             </ProtectedRoute>
           } />
           <Route path="/admin/categories" element={
