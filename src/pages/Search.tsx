@@ -39,7 +39,13 @@ const Search: React.FC = () => {
     const fetchResults = async () => {
       setLoading(true);
       try {
-        const results = await postService.getAllPosts({ search: query, category_id: categoryFilter, tag: tagFilter, username: userFilter });
+        const results = await postService.getAllPosts({
+          search: query || undefined,
+          category_id: categoryFilter || undefined,
+          tag: tagFilter || undefined,
+          username: userFilter || undefined,
+          per_page: 50,
+        });
         setPosts(Array.isArray(results) ? results : (results as any).data || []);
       } catch { console.error('Search failed'); }
       finally { setLoading(false); }
@@ -63,7 +69,12 @@ const Search: React.FC = () => {
           <div className="page-header">
             <div>
               <h1 style={{ margin: 0 }}>{query ? `Results for "${query}"` : 'Search Discussions'}</h1>
-              {!loading && <p className="page-header-sub">{posts.length} discussion{posts.length !== 1 ? 's' : ''} found</p>}
+              {!loading && (
+                <p className="page-header-sub">
+                  {posts.length} discussion{posts.length !== 1 ? 's' : ''} found
+                  {query && <span style={{ color: 'var(--text-3)' }}> — searching title, body, username &amp; category</span>}
+                </p>
+              )}
             </div>
             {hasFilters && (
               <button className="btn btn-outline btn-sm" onClick={() => navigate('/search')}>
@@ -208,7 +219,7 @@ const Search: React.FC = () => {
             <input
               type="text"
               className="search-filter-input"
-              placeholder="Search discussions..."
+              placeholder="Search by title, category, or user..."
               defaultValue={query}
             />
             <button type="submit" className="sidebar-search-btn">

@@ -1055,51 +1055,51 @@
   pointer-events: none;
 }
 
-/* Rank 1 — Rainbow gold fire ring */
+/* Rank 1 — Gold ring */
 .mini-podium-col.rank-1 .podium-avatar-wrap::before {
   inset: -4px;
   background: conic-gradient(
-    from var(--fire-angle),
-    #ffd700, #ff8c00, #ff4500, #ff0080,
-    #bf00ff, #00bfff, #00ff88, #ffd700
+    from 0deg,
+    #ffd700, #ffec80, #b8860b, #ffd700,
+    #ffec80, #b8860b, #ffd700
   );
-  animation: fireRotate 2s linear infinite, firePulse 3s ease-in-out infinite;
+  animation: fireRotate 3s linear infinite;
 }
 .mini-podium-col.rank-1 .podium-avatar-wrap {
   box-shadow:
     0 0 22px rgba(255, 200, 0, 0.55),
-    0 0 50px rgba(255, 100, 0, 0.25);
+    0 0 50px rgba(255, 200, 0, 0.20);
   border-radius: 50%;
   animation: firePulse 3s ease-in-out infinite;
 }
 
-/* Rank 2 — Silver fire ring */
+/* Rank 2 — Silver ring */
 .mini-podium-col.rank-2 .podium-avatar-wrap::before {
   inset: -3px;
   background: conic-gradient(
-    from var(--fire-angle),
-    #c8d2dc, #ffffff, #8fa8c0, #d4dfe8,
-    #6b8fa8, #e8eef4, #c8d2dc
+    from 0deg,
+    #c0c0c0, #e8e8e8, #909090, #c0c0c0,
+    #e8e8e8, #909090, #c0c0c0
   );
-  animation: fireRotate 3.5s linear infinite;
+  animation: fireRotate 4s linear infinite;
 }
 .mini-podium-col.rank-2 .podium-avatar-wrap {
-  box-shadow: 0 0 16px rgba(180, 200, 220, 0.5);
+  box-shadow: 0 0 16px rgba(192, 192, 192, 0.5);
   border-radius: 50%;
 }
 
-/* Rank 3 — Wood fire ring */
+/* Rank 3 — Bronze ring */
 .mini-podium-col.rank-3 .podium-avatar-wrap::before {
   inset: -3px;
   background: conic-gradient(
-    from var(--fire-angle),
-    #c8641e, #e8881a, #a04010, #d46c14,
-    #884018, #f09020, #c8641e
+    from 0deg,
+    #cd7f32, #e8a85a, #8b4513, #cd7f32,
+    #e8a85a, #8b4513, #cd7f32
   );
-  animation: fireRotate 4.5s linear infinite;
+  animation: fireRotate 5s linear infinite;
 }
 .mini-podium-col.rank-3 .podium-avatar-wrap {
-  box-shadow: 0 0 14px rgba(200, 100, 30, 0.5);
+  box-shadow: 0 0 14px rgba(205, 127, 50, 0.5);
   border-radius: 50%;
 }
 

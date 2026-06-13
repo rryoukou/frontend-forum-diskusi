@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import Layout from '../layouts/Layout';
 import badgeService from '../services/badgeService';
 import type { ReputationLog } from '../services/badgeService';
-import { useAppSelector } from '../store/hooks';
+import { useAppSelector, useAppDispatch } from '../store/hooks';
+import { fetchCurrentUser } from '../store/authSlice';
 import {
   Star, ThumbsUp, MessageCircle, PenLine, Award, Calendar, ArrowUpRight, ArrowDownLeft
 } from 'lucide-react';
@@ -21,10 +22,14 @@ const ReputationHistory: React.FC = () => {
   const [logs, setLogs]       = useState<ReputationLog[]>([]);
   const [loading, setLoading] = useState(true);
   const { user }              = useAppSelector((s) => s.auth);
+  const dispatch              = useAppDispatch();
 
   useEffect(() => {
     const fetchHistory = async () => {
       try {
+        // Fetch fresh user data dari server agar reputation_points selalu up-to-date
+        await dispatch(fetchCurrentUser());
+
         const data = await badgeService.getReputationHistory();
         setLogs(Array.isArray(data) ? data : (data as any).data || []);
       } catch {
@@ -34,9 +39,9 @@ const ReputationHistory: React.FC = () => {
       }
     };
     fetchHistory();
-  }, []);
+  }, [dispatch]);
 
-  const totalPoints = logs.reduce((sum, l) => sum + (l.points || 0), 0);
+  const totalPoints  = user?.reputation_points ?? 0;
   const positiveLogs = logs.filter(l => l.points > 0).length;
 
   return (

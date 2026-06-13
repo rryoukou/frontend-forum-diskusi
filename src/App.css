@@ -9,8 +9,8 @@
 }
 
 @keyframes pageFadeIn {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
 
 /* ============================
@@ -43,8 +43,8 @@
 
 .leaderboard-grid {
   display: grid;
-  grid-template-columns: 1.25fr 0.75fr;
-  gap: var(--sp-8);
+  grid-template-columns: 1.35fr 1fr;
+  gap: var(--sp-6);
   align-items: start;
   margin-top: var(--sp-6);
 }
@@ -262,7 +262,7 @@
   border: 2px solid rgba(255,255,255,0.08);
 }
 
-/* ══ RANK 1 — Rainbow gold fire ring ══ */
+/* ══ RANK 1 — Gold ring ══ */
 .podium-card.rank-1 .podium-avatar-wrap .podium-avatar {
   width: 84px;
   height: 84px;
@@ -274,11 +274,11 @@
   inset: -4px;
   border-radius: 50%;
   background: conic-gradient(
-    from var(--fire-angle),
-    #ffd700, #ff8c00, #ff4500, #ff0080,
-    #bf00ff, #00bfff, #00ff88, #ffd700
+    from 0deg,
+    #ffd700, #ffec80, #b8860b, #ffd700,
+    #ffec80, #b8860b, #ffd700
   );
-  animation: fireRotate 2s linear infinite, firePulse 3s ease-in-out infinite;
+  animation: fireRotate 3s linear infinite;
   z-index: 0;
 }
 .podium-card.rank-1 .podium-avatar-wrap .podium-avatar {
@@ -288,12 +288,12 @@
 .podium-card.rank-1 .podium-avatar-wrap {
   box-shadow:
     0 0 22px rgba(255, 200, 0, 0.55),
-    0 0 50px rgba(255, 100, 0, 0.25);
+    0 0 50px rgba(255, 200, 0, 0.20);
   border-radius: 50%;
   animation: firePulse 3s ease-in-out infinite;
 }
 
-/* ══ RANK 2 — Silver / steel fire ring ══ */
+/* ══ RANK 2 — Silver ring ══ */
 .podium-card.rank-2 .podium-avatar-wrap .podium-avatar {
   width: 74px;
   height: 74px;
@@ -304,11 +304,11 @@
   inset: -3px;
   border-radius: 50%;
   background: conic-gradient(
-    from var(--fire-angle),
-    #c8d2dc, #ffffff, #8fa8c0, #d4dfe8,
-    #6b8fa8, #e8eef4, #c8d2dc
+    from 0deg,
+    #c0c0c0, #e8e8e8, #909090, #c0c0c0,
+    #e8e8e8, #909090, #c0c0c0
   );
-  animation: fireRotate 3.5s linear infinite;
+  animation: fireRotate 4s linear infinite;
   z-index: 0;
 }
 .podium-card.rank-2 .podium-avatar-wrap .podium-avatar {
@@ -316,11 +316,11 @@
   z-index: 1;
 }
 .podium-card.rank-2 .podium-avatar-wrap {
-  box-shadow: 0 0 16px rgba(180, 200, 220, 0.5);
+  box-shadow: 0 0 16px rgba(192, 192, 192, 0.5);
   border-radius: 50%;
 }
 
-/* ══ RANK 3 — Wood / amber fire ring ══ */
+/* ══ RANK 3 — Bronze ring ══ */
 .podium-card.rank-3 .podium-avatar-wrap .podium-avatar {
   width: 68px;
   height: 68px;
@@ -331,11 +331,11 @@
   inset: -3px;
   border-radius: 50%;
   background: conic-gradient(
-    from var(--fire-angle),
-    #c8641e, #e8881a, #a04010, #d46c14,
-    #884018, #f09020, #c8641e
+    from 0deg,
+    #cd7f32, #e8a85a, #8b4513, #cd7f32,
+    #e8a85a, #8b4513, #cd7f32
   );
-  animation: fireRotate 4.5s linear infinite;
+  animation: fireRotate 5s linear infinite;
   z-index: 0;
 }
 .podium-card.rank-3 .podium-avatar-wrap .podium-avatar {
@@ -343,7 +343,7 @@
   z-index: 1;
 }
 .podium-card.rank-3 .podium-avatar-wrap {
-  box-shadow: 0 0 14px rgba(200, 100, 30, 0.5);
+  box-shadow: 0 0 14px rgba(205, 127, 50, 0.5);
   border-radius: 50%;
 }
 
@@ -381,10 +381,10 @@
 
 /* Leaderboard Table */
 .leaderboard-table-card {
-  background: #141414;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: linear-gradient(145deg, #161616, #121212);
+  border: 1px solid rgba(255, 255, 255, 0.07);
   border-radius: var(--radius-lg);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.05);
   overflow: hidden;
   margin-top: var(--sp-2);
 }
@@ -392,21 +392,47 @@
 .leaderboard-table {
   width: 100%;
   border-collapse: collapse;
+  table-layout: auto;
 }
 
 .leaderboard-table thead {
-  background: #1c1c1c;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: linear-gradient(90deg, #1e1e1e, #1a1a1a);
+  border-bottom: 1px solid rgba(0, 208, 132, 0.15);
 }
 
 .leaderboard-table th {
-  padding: var(--sp-4) var(--sp-5);
+  padding: 9px 12px;
   text-align: left;
-  font-size: 0.75rem;
+  font-size: 0.65rem;
   font-weight: 700;
   color: var(--text-3);
   text-transform: uppercase;
   letter-spacing: 0.1em;
+  white-space: nowrap;
+  overflow: visible;
+}
+
+/* Column widths */
+.leaderboard-table th:nth-child(1),
+.leaderboard-table td:nth-child(1) {
+  width: 52px;
+  white-space: nowrap;
+}
+
+.leaderboard-table th:nth-child(2),
+.leaderboard-table td:nth-child(2) {
+  /* user col: takes remaining space */
+}
+
+.leaderboard-table th:nth-child(3),
+.leaderboard-table td:nth-child(3) {
+  width: 1%;
+  white-space: nowrap;
+}
+
+.leaderboard-table th:nth-child(4),
+.leaderboard-table td:nth-child(4) {
+  width: 1%;
   white-space: nowrap;
 }
 
@@ -416,7 +442,7 @@
 }
 
 .leaderboard-table tbody tr {
-  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
   transition: var(--transition);
 }
 
@@ -431,44 +457,44 @@
 
 /* Ranks 11+ Left Border Grey Accent */
 .leaderboard-right .leaderboard-table tbody tr {
-  border-left: 3px solid rgba(255, 255, 255, 0.1);
+  border-left: 3px solid rgba(255, 255, 255, 0.08);
 }
 
 .leaderboard-table tbody tr:hover {
-  background: rgba(0, 208, 132, 0.04);
+  background: rgba(0, 208, 132, 0.05);
 }
 
 .leaderboard-table td {
-  padding: var(--sp-4) var(--sp-5);
+  padding: 8px 12px;
   vertical-align: middle;
 }
 
 .lb-rank {
-  font-weight: 800;
-  font-size: 0.95rem;
-  color: var(--text-2);
+  font-weight: 700;
+  font-size: 0.82rem;
+  color: var(--text-3);
 }
 
 .lb-user {
   display: flex;
   align-items: center;
-  gap: var(--sp-3);
+  gap: 8px;
 }
 
 .lb-avatar {
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
   background: var(--gradient-primary);
   color: #0d0d0d;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.85rem;
+  font-size: 0.75rem;
   font-weight: 800;
   flex-shrink: 0;
   overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 208, 132, 0.2);
+  box-shadow: 0 2px 6px rgba(0, 208, 132, 0.2);
 }
 
 .lb-avatar img {
@@ -480,9 +506,12 @@
 .lb-username {
   font-weight: 700;
   color: var(--text-1);
-  font-size: 0.9rem;
+  font-size: 0.875rem;
   text-decoration: none;
   transition: var(--transition);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .lb-username:hover {
@@ -492,19 +521,23 @@
 .lb-rep {
   font-weight: 800;
   color: var(--primary);
-  font-size: 0.9rem;
+  font-size: 0.875rem;
+  white-space: nowrap;
+  display: block;
+  text-align: right;
 }
 
 .lb-level {
   display: inline-flex;
   align-items: center;
-  padding: 0.15rem 0.5rem;
+  padding: 0.12rem 0.4rem;
   background: rgba(0, 208, 132, 0.08);
   color: var(--primary);
   border-radius: var(--radius-sm);
-  font-size: 0.68rem;
+  font-size: 0.65rem;
   font-weight: 700;
   border: 1px solid rgba(0, 208, 132, 0.15);
+  white-space: nowrap;
 }
 
 /* ============================

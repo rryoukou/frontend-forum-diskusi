@@ -2,9 +2,18 @@ import api from './api';
 import type { Post } from '../types/index';
 
 const postService = {
-  getAllPosts: async (params?: any): Promise<Post[]> => {
-    const response = await api.get('/posts', { params });
-    return response.data.data || response.data; // Handle both paginated and non-paginated
+  getAllPosts: async (params?: Record<string, string | number | undefined>): Promise<Post[]> => {
+    // Strip empty/undefined params so backend filters don't trigger on empty strings
+    const cleanParams: Record<string, string | number> = {};
+    if (params) {
+      Object.entries(params).forEach(([k, v]) => {
+        if (v !== undefined && v !== null && v !== '') {
+          cleanParams[k] = v;
+        }
+      });
+    }
+    const response = await api.get('/posts', { params: Object.keys(cleanParams).length ? cleanParams : undefined });
+    return response.data.data || response.data;
   },
 
   getTrendingPosts: async (): Promise<Post[]> => {

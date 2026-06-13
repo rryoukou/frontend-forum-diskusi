@@ -1,5 +1,11 @@
 import React, { createContext, useContext, useState } from 'react';
-import { HelpCircle, CheckCircle2, AlertTriangle, Info, X } from 'lucide-react';
+import { HelpCircle, CheckCircle2, AlertTriangle, Info, X, Trash2 } from 'lucide-react';
+
+interface ConfirmOptions {
+  confirmText?: string;
+  cancelText?: string;
+  variant?: 'danger' | 'primary';
+}
 
 interface ConfirmConfig {
   isOpen: boolean;
@@ -8,10 +14,13 @@ interface ConfirmConfig {
   title: string;
   message: string;
   resolve: (value: boolean) => void;
+  confirmText?: string;
+  cancelText?: string;
+  variant?: 'danger' | 'primary';
 }
 
 interface ConfirmContextType {
-  confirm: (title: string, message: string) => Promise<boolean>;
+  confirm: (title: string, message: string, options?: ConfirmOptions) => Promise<boolean>;
   alert: (title: string, message: string, type?: 'success' | 'error' | 'info') => Promise<void>;
 }
 
@@ -20,7 +29,7 @@ const ConfirmContext = createContext<ConfirmContextType | null>(null);
 export const ConfirmProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [config, setConfig] = useState<ConfirmConfig | null>(null);
 
-  const confirm = (title: string, message: string): Promise<boolean> => {
+  const confirm = (title: string, message: string, options?: ConfirmOptions): Promise<boolean> => {
     return new Promise((resolve) => {
       setConfig({
         isOpen: true,
@@ -28,6 +37,9 @@ export const ConfirmProvider: React.FC<{ children: React.ReactNode }> = ({ child
         title,
         message,
         resolve,
+        confirmText: options?.confirmText,
+        cancelText: options?.cancelText,
+        variant: options?.variant,
       });
     });
   };
@@ -63,8 +75,9 @@ export const ConfirmProvider: React.FC<{ children: React.ReactNode }> = ({ child
             </button>
             
             <div className="custom-dialog-header">
-              <div className={`custom-dialog-icon custom-dialog-icon--${config.type === 'confirm' ? 'confirm' : config.alertType}`}>
-                {config.type === 'confirm' && <HelpCircle size={22} />}
+              <div className={`custom-dialog-icon custom-dialog-icon--${config.type === 'confirm' ? (config.variant === 'danger' ? 'error' : 'confirm') : config.alertType}`}>
+                {config.type === 'confirm' && config.variant === 'danger' && <Trash2 size={22} />}
+                {config.type === 'confirm' && config.variant !== 'danger' && <HelpCircle size={22} />}
                 {config.type === 'alert' && config.alertType === 'success' && <CheckCircle2 size={22} />}
                 {config.type === 'alert' && config.alertType === 'error' && <AlertTriangle size={22} />}
                 {config.type === 'alert' && config.alertType === 'info' && <Info size={22} />}
@@ -80,10 +93,10 @@ export const ConfirmProvider: React.FC<{ children: React.ReactNode }> = ({ child
               {config.type === 'confirm' ? (
                 <>
                   <button className="btn btn-ghost" onClick={() => handleClose(false)}>
-                    Batal
+                    {config.cancelText || 'Batal'}
                   </button>
-                  <button className="btn btn-danger btn-logout-action" onClick={() => handleClose(true)}>
-                    Keluar
+                  <button className={`btn ${config.variant === 'danger' ? 'btn-danger' : 'btn-primary'} btn-logout-action`} onClick={() => handleClose(true)}>
+                    {config.confirmText || 'Konfirmasi'}
                   </button>
                 </>
               ) : (

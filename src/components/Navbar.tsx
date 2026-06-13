@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import * as Avatar from '@radix-ui/react-avatar';
-import { logoutUser } from '../store/authSlice';
+import { logoutUser, fetchCurrentUser } from '../store/authSlice';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import notificationService from '../services/notificationService';
 import authService from '../services/authService';
 import { useAuthModal } from '../context/AuthModalContext';
 import { useConfirm } from '../context/ConfirmContext';
 import { LogoBrand } from './Logo';
+import { resolveAvatar } from '../utils/avatar';
 import {
   Home, Trophy, Search, PenLine, User, Bookmark,
   Bell, TrendingUp, Flag, ScrollText, Users, FolderOpen,
@@ -46,9 +47,12 @@ const Navbar: React.FC<NavbarProps> = ({ onOpenSidebar }) => {
       }
     };
     fetchUnread();
-    const interval = setInterval(fetchUnread, 30000);
+    const interval = setInterval(() => {
+      fetchUnread();
+      dispatch(fetchCurrentUser());
+    }, 30000);
     return () => clearInterval(interval);
-  }, [user]);
+  }, [user, dispatch]);
 
   const handleLogout = async () => {
     const confirmLogout = await confirm('Konfirmasi Logout', 'Apakah Anda yakin ingin keluar dari akun Anda?');
@@ -114,7 +118,7 @@ const Navbar: React.FC<NavbarProps> = ({ onOpenSidebar }) => {
                 <Link to={`/profiles/${user.username}`} className="nav-user-btn" aria-label={`Profile: ${user.username}`}>
                   <Avatar.Root className="nav-avatar">
                     <Avatar.Image
-                      src={user.avatar_url ?? undefined}
+                      src={resolveAvatar(user.avatar_url) ?? undefined}
                       alt={user.username}
                     />
                     <Avatar.Fallback delayMs={200}>
@@ -161,7 +165,7 @@ const Navbar: React.FC<NavbarProps> = ({ onOpenSidebar }) => {
         {user && (
           <div className="drawer-user-card">
             <Avatar.Root className="drawer-user-avatar">
-              <Avatar.Image src={user.avatar_url ?? undefined} alt={user.username} />
+              <Avatar.Image src={resolveAvatar(user.avatar_url) ?? undefined} alt={user.username} />
               <Avatar.Fallback delayMs={200}>
                 {user.username.charAt(0).toUpperCase()}
               </Avatar.Fallback>

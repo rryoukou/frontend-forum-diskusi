@@ -7,11 +7,12 @@ import {
   LogOut, ChevronDown, X, LayoutDashboard, ShieldAlert // 👈 Tambahkan ShieldAlert di sini
 } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { logoutUser } from '../store/authSlice';
+import { logoutUser, fetchCurrentUser } from '../store/authSlice';
 import authService from '../services/authService';
 import notificationService from '../services/notificationService';
 import { LogoBrand } from './Logo';
 import { useConfirm } from '../context/ConfirmContext';
+import { resolveAvatar } from '../utils/avatar';
 import './Sidebar.css';
 
 interface SidebarProps {
@@ -44,9 +45,12 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
       }
     };
     fetchUnread();
-    const interval = setInterval(fetchUnread, 30000);
+    const interval = setInterval(() => {
+      fetchUnread();
+      dispatch(fetchCurrentUser());
+    }, 30000);
     return () => clearInterval(interval);
-  }, [user]);
+  }, [user, dispatch]);
 
   const handleLogout = async () => {
     const confirmLogout = await confirm('Konfirmasi Logout', 'Apakah Anda yakin ingin keluar dari akun Anda?');
@@ -119,7 +123,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
             aria-label={`View profile of ${user.username}`}
           >
             <Avatar.Root className="sidebar__avatar">
-              <Avatar.Image src={user.avatar_url ?? undefined} alt={user.username} />
+              <Avatar.Image src={resolveAvatar(user.avatar_url) ?? undefined} alt={user.username} />
               <Avatar.Fallback delayMs={200}>
                 {user.username.charAt(0).toUpperCase()}
               </Avatar.Fallback>
