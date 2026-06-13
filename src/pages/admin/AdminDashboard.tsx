@@ -3,8 +3,6 @@ import AdminLayout from '../../layouts/AdminLayout';
 import userService from '../../services/userService';
 import AdminDashboardView from './AdminDashboardView';
 import type { User } from '../../types/index';
-import { Users, FileText, AlertTriangle, TrendingUp, ShieldAlert, ShieldCheck } from 'lucide-react';
-import '../../App.css';
 
 function useAdminDashboard() {
   const [loading, setLoading] = useState(true);

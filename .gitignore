@@ -1,3 +1,8 @@
+# Cypress
+cypress/
+cypress.config.ts
+cypress.env.json
+
 # Logs
 logs
 *.log

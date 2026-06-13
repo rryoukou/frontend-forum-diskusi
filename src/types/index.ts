@@ -31,6 +31,7 @@ export interface Category {
   parent_id: string | null;
   created_at: string;
   children?: Category[];
+  posts_count?: number;
 }
 
 export interface Tag {

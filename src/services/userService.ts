@@ -26,10 +26,19 @@ const userService = {
       // Workaround for Laravel's issues with PUT/PATCH and multipart/form-data
       formData.append('_method', 'PUT');
       
+      // Delete the Content-Type so axios doesn't send 'application/json'
+      // and the browser can set the correct 'multipart/form-data; boundary=...' automatically
       const response = await api.post('/profile', formData, {
         headers: {
-          'Content-Type': 'multipart/form-data'
-        }
+          'Content-Type': 'multipart/form-data',
+        },
+        transformRequest: [(data, headers) => {
+          // Remove Content-Type so browser sets it with the correct boundary
+          if (headers) {
+            delete headers['Content-Type'];
+          }
+          return data;
+        }],
       });
       return response.data;
     }
