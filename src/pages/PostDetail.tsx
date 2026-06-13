@@ -6,6 +6,8 @@ import commentService from '../services/commentService';
 import reportService from '../services/reportService';
 import authService from '../services/authService';
 import HistoryModal from '../components/HistoryModal';
+import ReportModal from '../components/ReportModal';
+import DeleteModal from '../components/DeleteModal';
 import type { Post, Comment } from '../types/index';
 import Layout from '../layouts/Layout';
 import {
@@ -13,6 +15,9 @@ import {
   CornerUpLeft, Pencil, Trash2, CheckCircle2, Clock,
   MessageCircle, Send,
 } from 'lucide-react';
+import { resolveAvatar } from '../utils/avatar';
+import { useAppDispatch } from '../store/hooks';
+import { fetchCurrentUser } from '../store/authSlice';
 import './PostDetail.css';
 
 interface CommentItemProps {
@@ -31,6 +36,14 @@ interface CommentItemProps {
   onEditCancel: () => void;
 }
 
+const Avatar: React.FC<{ url?: string | null; name?: string }> = ({ url, name }) => {
+  const [broken, setBroken] = useState(false);
+  const resolved = resolveAvatar(url);
+  const initial = (name || '?').charAt(0).toUpperCase();
+  if (!resolved || broken) return <>{initial}</>;
+  return <img src={resolved} alt={name || 'User'} onError={() => setBroken(true)} />;
+};
+
 const CommentItem: React.FC<CommentItemProps> = ({
   comment, user, isAuthor, isModerator, onVote, onLike, onReport,
   onDelete, onEdit, onHistory, onAccept, onReply,
@@ -39,9 +52,7 @@ const CommentItem: React.FC<CommentItemProps> = ({
   <div className={`comment-card${comment.parent_id ? ' comment-card-nested' : ''}`}>
     <div className="comment-header">
       <div className="comment-avatar">
-        {comment.user?.avatar_url
-          ? <img src={comment.user.avatar_url} alt={comment.user.username} />
-          : comment.user?.username.charAt(0).toUpperCase()}
+        <Avatar url={comment.user?.avatar_url} name={comment.user?.username} />
       </div>
       <Link to={`/profiles/${comment.user?.username}`} className="comment-author">
         {comment.user?.username}
@@ -61,7 +72,7 @@ const CommentItem: React.FC<CommentItemProps> = ({
                 <Pencil size={12} strokeWidth={2.5} /> Edit
               </button>
             )}
-            <button onClick={() => onDelete(comment.id)} className="comment-action-btn danger">
+            <button type="button" onClick={() => onDelete(comment.id)} className="comment-action-btn danger">
               <Trash2 size={12} strokeWidth={2.5} /> Delete
             </button>
           </>
@@ -69,7 +80,7 @@ const CommentItem: React.FC<CommentItemProps> = ({
       </div>
     </div>
 
-    {comment.is_accepted && (
+    {!!comment.is_accepted && (
       <div className="accepted-badge">
         <CheckCircle2 size={13} strokeWidth={2.5} /> Accepted Answer
       </div>
@@ -86,20 +97,20 @@ const CommentItem: React.FC<CommentItemProps> = ({
       </form>
     ) : (
       <>
-        <div className="comment-body">{comment.body}</div>
+        <div className="comment-body">{typeof comment.body === 'string' ? comment.body : ''}</div>
         <div className="comment-actions">
           <div className="vote-control">
             <button onClick={() => onVote(comment.id, 'upvote')}   className="vote-btn"><ChevronUp   size={15} strokeWidth={2.5} /></button>
-            <span className="vote-score">{comment.vote_score}</span>
+            <span className="vote-score">{comment.vote_score ?? 0}</span>
             <button onClick={() => onVote(comment.id, 'downvote')} className="vote-btn"><ChevronDown size={15} strokeWidth={2.5} /></button>
           </div>
           <button onClick={() => onLike(comment.id)} className="comment-action-btn">
-            <Heart size={13} strokeWidth={2.5} /> {comment.likes_count || 0}
+            <Heart size={13} strokeWidth={2.5} /> {comment.likes_count ? comment.likes_count : null}
           </button>
           <button onClick={() => onReply(comment)} className="comment-action-btn">
             <CornerUpLeft size={13} strokeWidth={2.5} /> Reply
           </button>
-          <button onClick={() => onReport(comment.id, 'comment')} className="comment-action-btn danger">
+          <button type="button" onClick={() => onReport(comment.id, 'comment')} className="comment-action-btn danger">
             <Flag size={13} strokeWidth={2.5} /> Report
           </button>
           {isAuthor && !comment.is_accepted && (
@@ -112,7 +123,7 @@ const CommentItem: React.FC<CommentItemProps> = ({
       </>
     )}
 
-    {comment.children && comment.children.length > 0 && (
+    {Array.isArray(comment.children) && comment.children.length > 0 && (
       <div style={{ marginTop: 'var(--sp-4)' }}>
         {comment.children.map(child => (
           <CommentItem key={child.id} comment={child} user={user} isAuthor={isAuthor}
@@ -138,9 +149,12 @@ const PostDetail: React.FC = () => {
   const [history, setHistory]                   = useState<any[]>([]);
   const [historyTitle, setHistoryTitle]         = useState('');
   const [isHistoryOpen, setIsHistoryOpen]       = useState(false);
+  const [reportTarget, setReportTarget]         = useState<{ id: string; type: 'post' | 'comment' } | null>(null);
+  const [deleteTarget, setDeleteTarget]         = useState<{ id: string; type: 'post' | 'comment'; showReason: boolean } | null>(null);
   const [loading, setLoading]                   = useState(true);
   const navigate  = useNavigate();
   const user      = authService.getCurrentUser();
+  const dispatch  = useAppDispatch();
 
   const fetchPost = async () => {
     if (!id) return;
@@ -154,37 +168,46 @@ const PostDetail: React.FC = () => {
   };
   useEffect(() => { fetchPost(); }, [id]);
 
-  const handlePostDelete = async () => {
+  const handlePostDelete = () => {
     if (!id || !post) return;
     const isMod = user && user.id !== post.user_id && authService.isModerator();
-    if (!window.confirm('Delete this post?')) return;
-    const reason = isMod ? window.prompt('Reason:') || 'Rule violation' : '';
+    setDeleteTarget({ id, type: 'post', showReason: !!isMod });
+  };
+  const confirmPostDelete = async (reason?: string) => {
+    if (!id) return;
     try { await postService.deletePost(id, reason); navigate('/'); } catch { console.error('Delete failed'); }
+    finally { setDeleteTarget(null); }
   };
 
-  const handleVote     = async (type: 'upvote' | 'downvote') => { if (!user) return alert('Login to vote'); try { await interactionService.vote(id!, 'post', type); await fetchPost(); } catch { /* */ } };
-  const handleLike     = async () => { if (!user) return alert('Login to like'); try { await interactionService.toggleLike(id!, 'post'); await fetchPost(); } catch { /* */ } };
+  const handleVote     = async (type: 'upvote' | 'downvote') => { if (!user) return alert('Login to vote'); try { await interactionService.vote(id!, 'post', type); await fetchPost(); dispatch(fetchCurrentUser()); } catch { /* */ } };
+  const handleLike     = async () => { if (!user) return alert('Login to like'); try { await interactionService.toggleLike(id!, 'post'); await fetchPost(); dispatch(fetchCurrentUser()); } catch { /* */ } };
   const handleBookmark = async () => { if (!user) return alert('Login to bookmark'); try { await interactionService.toggleBookmark(id!); await fetchPost(); } catch { /* */ } };
 
   const handleCommentSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newComment.trim() || !id) return;
-    try { await commentService.createComment({ post_id: id, body: newComment, parent_id: replyingTo?.id }); setNewComment(''); setReplyingTo(null); await fetchPost(); } catch { /* */ }
+    try { await commentService.createComment({ post_id: id, body: newComment, parent_id: replyingTo?.id }); setNewComment(''); setReplyingTo(null); await fetchPost(); dispatch(fetchCurrentUser()); } catch { /* */ }
   };
-  const handleCommentDelete = async (cid: string) => {
+  const handleCommentDelete = (cid: string) => {
     const findC = (list: Comment[]): Comment | undefined => { for (const c of list) { if (c.id === cid) return c; if (c.children) { const f = findC(c.children); if (f) return f; } } };
     const found = findC(comments);
     const isMod = user && found && user.id !== found.user_id && authService.isModerator();
-    if (!window.confirm('Delete this comment?')) return;
-    const reason = isMod ? window.prompt('Reason:') || 'Rule violation' : '';
-    try { await commentService.deleteComment(cid, reason); await fetchPost(); } catch { /* */ }
+    setDeleteTarget({ id: cid, type: 'comment', showReason: !!isMod });
   };
-  const handleCommentVote   = async (cid: string, type: 'upvote' | 'downvote') => { if (!user) return alert('Login to vote'); try { await interactionService.vote(cid, 'comment', type); await fetchPost(); } catch { /* */ } };
-  const handleCommentLike   = async (cid: string) => { if (!user) return alert('Login to like'); try { await interactionService.toggleLike(cid, 'comment'); await fetchPost(); } catch { /* */ } };
+  const confirmCommentDelete = async (reason?: string) => {
+    if (!deleteTarget) return;
+    try { await commentService.deleteComment(deleteTarget.id, reason); await fetchPost(); } catch { /* */ }
+    finally { setDeleteTarget(null); }
+  };
+  const handleCommentVote   = async (cid: string, type: 'upvote' | 'downvote') => { if (!user) return alert('Login to vote'); try { await interactionService.vote(cid, 'comment', type); await fetchPost(); dispatch(fetchCurrentUser()); } catch { /* */ } };
+  const handleCommentLike   = async (cid: string) => { if (!user) return alert('Login to like'); try { await interactionService.toggleLike(cid, 'comment'); await fetchPost(); dispatch(fetchCurrentUser()); } catch { /* */ } };
   const startEdit           = (c: Comment) => { setEditingCommentId(c.id); setEditCommentBody(c.body); };
   const handleCommentUpdate = async (e: React.FormEvent) => { e.preventDefault(); if (!editingCommentId || !editCommentBody.trim()) return; try { await commentService.updateComment(editingCommentId, { body: editCommentBody }); setEditingCommentId(null); await fetchPost(); } catch { /* */ } };
-  const handleReport        = async (tid: string, type: 'post' | 'comment') => { if (!user) return alert('Login to report'); const r = window.prompt(`Reason for reporting this ${type}?`); if (!r) return; try { await reportService.submitReport(tid, type, r); alert('Report submitted!'); } catch { /* */ } };
-  const handleAccept        = async (cid: string) => { try { await commentService.acceptComment(cid); await fetchPost(); } catch { /* */ } };
+  const handleReport = (tid: string, type: 'post' | 'comment') => {
+    if (!user) { alert('Login to report'); return; }
+    setReportTarget({ id: tid, type });
+  };
+  const handleAccept        = async (cid: string) => { try { await commentService.acceptComment(cid); await fetchPost(); dispatch(fetchCurrentUser()); } catch { /* */ } };
   const showHistory         = async (tid: string, type: 'post' | 'comment') => {
     try {
       const d = type === 'post' ? await postService.getPostHistory(tid) : await commentService.getCommentHistory(tid);
@@ -230,7 +253,7 @@ const PostDetail: React.FC = () => {
             <h1 style={{ fontSize: 'clamp(1.4rem,3vw,1.9rem)', margin: 'var(--sp-4) 0 0', fontWeight: 800, letterSpacing: '-0.02em' }}>
               {post.title}
             </h1>
-            {post.tags && post.tags.length > 0 && (
+            {Array.isArray(post.tags) && post.tags.length > 0 && (
               <div className="post-tags-row" style={{ padding: 0, marginTop: 'var(--sp-4)' }}>
                 {post.tags.map(tag => (
                   <Link key={tag.id} to={`/search?q=${tag.name}`} className="tag-badge">#{tag.name}</Link>
@@ -253,7 +276,7 @@ const PostDetail: React.FC = () => {
             <button onClick={handleBookmark} className="action-btn">
               <Bookmark size={14} strokeWidth={2.5} /> {post.bookmarks_count} Saves
             </button>
-            <button onClick={() => handleReport(post.id, 'post')} className="action-btn action-btn-danger">
+            <button type="button" onClick={() => handleReport(post.id, 'post')} className="action-btn action-btn-danger">
               <Flag size={14} strokeWidth={2.5} /> Report
             </button>
             <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 4, fontSize: '0.8rem', color: 'var(--text-3)' }}>
@@ -319,6 +342,30 @@ const PostDetail: React.FC = () => {
         </section>
 
         <HistoryModal isOpen={isHistoryOpen} onClose={() => setIsHistoryOpen(false)} history={history} title={historyTitle} />
+        <ReportModal
+          isOpen={reportTarget !== null}
+          targetType={reportTarget?.type ?? 'post'}
+          targetId={reportTarget?.id ?? ''}
+          onClose={() => setReportTarget(null)}
+          onSubmit={async (reason) => {
+            if (reportTarget) {
+              await reportService.submitReport(reportTarget.id, reportTarget.type, reason);
+            }
+          }}
+        />
+        <DeleteModal
+          isOpen={deleteTarget !== null}
+          targetType={deleteTarget?.type ?? 'post'}
+          showReason={deleteTarget?.showReason}
+          onClose={() => setDeleteTarget(null)}
+          onConfirm={(reason) => {
+            if (deleteTarget?.type === 'post') {
+              confirmPostDelete(reason);
+            } else {
+              confirmCommentDelete(reason);
+            }
+          }}
+        />
       </div>
     </Layout>
   );

@@ -6,6 +6,9 @@ import postService from '../services/postService';
 import authService from '../services/authService';
 import moderationService from '../services/moderationService';
 import type { User, Post } from '../types/index';
+import { resolveAvatar } from '../utils/avatar';
+import { useAppDispatch } from '../store/hooks';
+import { setUser } from '../store/authSlice';
 import {
   PenLine, UserPlus, UserCheck, AlertTriangle, Ban, ShieldCheck,
   Star, Target, CalendarDays, ThumbsUp, Eye, Medal, FileText,
@@ -19,12 +22,17 @@ const Profile: React.FC = () => {
   const [loading, setLoading]     = useState(true);
   const [isFollowing, setIsFollowing] = useState(false);
   const currentUser = authService.getCurrentUser();
+  const dispatch = useAppDispatch();
 
   const fetchProfileData = async () => {
     if (!username) return;
     try {
       const pd = await userService.getProfile(username);
       setProfile(pd); setIsFollowing(pd.is_following || false);
+      // Sync auth state when viewing own profile so sidebar/navbar stay up-to-date
+      if (currentUser?.username === pd.username) {
+        dispatch(setUser(pd));
+      }
       const posts = await postService.getAllPosts({ username });
       setUserPosts(posts);
     } catch { console.error('Failed to fetch profile'); }
@@ -55,7 +63,7 @@ const Profile: React.FC = () => {
             <div className="profile-banner" />
             <div className="profile-avatar-wrap">
               <div className="avatar-large">
-                {profile.avatar_url ? <img src={profile.avatar_url} alt="avatar" /> : profile.username[0].toUpperCase()}
+                {profile.avatar_url ? <img src={resolveAvatar(profile.avatar_url)!} alt="avatar" /> : profile.username[0].toUpperCase()}
               </div>
             </div>
 

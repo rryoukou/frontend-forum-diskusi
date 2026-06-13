@@ -54,12 +54,12 @@ const userService = {
 
   getFollowers: async (username: string): Promise<User[]> => {
     const response = await api.get(`/profiles/${username}/followers`);
-    return response.data;
+    return response.data.data || response.data;
   },
 
   getFollowing: async (username: string): Promise<User[]> => {
     const response = await api.get(`/profiles/${username}/following`);
-    return response.data;
+    return response.data.data || response.data;
   },
 
   toggleFollow: async (userId: string): Promise<any> => {

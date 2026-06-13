@@ -8,9 +8,9 @@ import '../App.css';
 
 /* Rank icon by position */
 const RankIcon = ({ rank }: { rank: number }) => {
-  if (rank === 1) return <Trophy size={26} strokeWidth={1.8} style={{ color: '#f59e0b' }} />;
-  if (rank === 2) return <Medal  size={24} strokeWidth={1.8} style={{ color: '#94a3b8' }} />;
-  if (rank === 3) return <Medal  size={22} strokeWidth={1.8} style={{ color: '#f97316' }} />;
+  if (rank === 1) return <Trophy size={26} strokeWidth={1.8} style={{ color: '#ffd700' }} />;
+  if (rank === 2) return <Medal  size={24} strokeWidth={1.8} style={{ color: '#c0c0c0' }} />;
+  if (rank === 3) return <Medal  size={22} strokeWidth={1.8} style={{ color: '#cd7f32' }} />;
   return <span style={{ fontWeight: 800, color: 'var(--text-3)', fontSize: '0.95rem' }}>#{rank}</span>;
 };
 

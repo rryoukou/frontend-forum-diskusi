@@ -99,6 +99,23 @@ export const logoutUser = createAsyncThunk<void, void, { rejectValue: string }>(
   }
 );
 
+export const fetchCurrentUser = createAsyncThunk<User, void, { rejectValue: string }>(
+  'auth/fetchCurrentUser',
+  async (_, { rejectWithValue }) => {
+    try {
+      const meRes = await api.get('/me');
+      const user: User = meRes.data;
+      localStorage.setItem('user', JSON.stringify(user));
+      return user;
+    } catch (err: unknown) {
+      const message =
+        (err as { response?: { data?: { message?: string } } }).response?.data?.message ??
+        'Failed to fetch user data';
+      return rejectWithValue(message);
+    }
+  }
+);
+
 // ─── Slice ───────────────────────────────────────────────────────────────────
 
 const initialState: AuthState = {
@@ -162,6 +179,16 @@ const authSlice = createSlice({
       .addCase(logoutUser.rejected, (state) => {
         state.user = null;
         state.token = null;
+      });
+
+    // ── Fetch Current User ──────────────────────────────────
+    builder
+      .addCase(fetchCurrentUser.fulfilled, (state, action) => {
+        state.user = action.payload;
+      })
+      .addCase(fetchCurrentUser.rejected, (state, action) => {
+        // Keep existing user on error; do not clear auth state
+        state.error = action.payload ?? 'Failed to refresh user data';
       });
   },
 });

@@ -10,6 +10,9 @@ import userService from '../services/userService';
 import Layout from '../layouts/Layout';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuthModal } from '../context/AuthModalContext';
+import { useAppDispatch } from '../store/hooks';
+import { fetchCurrentUser } from '../store/authSlice';
+import ReportModal from '../components/ReportModal';
 import {
   PenLine, Search, User as UserIcon, FolderOpen, ThumbsUp, MessageCircle,
   Eye, Flame, Tag as TagIcon, MessageSquarePlus,
@@ -17,9 +20,32 @@ import {
 } from 'lucide-react';
 import './Home.css';
 
+const DUMMY_CONTRIBUTORS: User[] = (() => {
+  const now = new Date().toISOString();
+  return [
+    { id: 'd1',  username: 'max_verstappen',   email: 'max@demo.com',      bio: null, reputation_points: 1250, level: 12, avatar_url: '/avatar_1.png', is_banned: false, created_at: now, updated_at: now },
+    { id: 'd2',  username: 'lewis_hamilton',   email: 'lewis@demo.com',    bio: null, reputation_points: 1120, level: 11, avatar_url: '/avatar_2.png', is_banned: false, created_at: now, updated_at: now },
+    { id: 'd3',  username: 'charles_leclerc',  email: 'charles@demo.com',  bio: null, reputation_points: 980,  level: 10, avatar_url: '/avatar_3.png', is_banned: false, created_at: now, updated_at: now },
+    { id: 'd4',  username: 'lando_norris',     email: 'lando@demo.com',    bio: null, reputation_points: 920,  level: 9,  avatar_url: '/avatar_4.png', is_banned: false, created_at: now, updated_at: now },
+    { id: 'd5',  username: 'oscar_piastri',    email: 'oscar@demo.com',    bio: null, reputation_points: 880,  level: 9,  avatar_url: '/avatar_5.png', is_banned: false, created_at: now, updated_at: now },
+    { id: 'd6',  username: 'carlos_sainz',     email: 'carlos@demo.com',   bio: null, reputation_points: 820,  level: 8,  avatar_url: '/avatar_6.png', is_banned: false, created_at: now, updated_at: now },
+    { id: 'd7',  username: 'george_russell',   email: 'george@demo.com',   bio: null, reputation_points: 790,  level: 8,  avatar_url: '/avatar_1.png', is_banned: false, created_at: now, updated_at: now },
+    { id: 'd8',  username: 'fernando_alonso',  email: 'fernando@demo.com', bio: null, reputation_points: 710,  level: 7,  avatar_url: '/avatar_2.png', is_banned: false, created_at: now, updated_at: now },
+    { id: 'd9',  username: 'valtteri_bottas',  email: 'valtteri@demo.com', bio: null, reputation_points: 620,  level: 6,  avatar_url: '/avatar_3.png', is_banned: false, created_at: now, updated_at: now },
+    { id: 'd10', username: 'esteban_ocon',     email: 'esteban@demo.com',  bio: null, reputation_points: 580,  level: 6,  avatar_url: '/avatar_4.png', is_banned: false, created_at: now, updated_at: now },
+    { id: 'd11', username: 'pierre_gasly',     email: 'pierre@demo.com',   bio: null, reputation_points: 510,  level: 5,  avatar_url: '/avatar_5.png', is_banned: false, created_at: now, updated_at: now },
+    { id: 'd12', username: 'alex_albon',       email: 'alex@demo.com',     bio: null, reputation_points: 480,  level: 5,  avatar_url: '/avatar_6.png', is_banned: false, created_at: now, updated_at: now },
+    { id: 'd13', username: 'yuki_tsunoda',     email: 'yuki@demo.com',     bio: null, reputation_points: 430,  level: 4,  avatar_url: '/avatar_1.png', is_banned: false, created_at: now, updated_at: now },
+    { id: 'd14', username: 'daniel_ricciardo', email: 'daniel@demo.com',   bio: null, reputation_points: 390,  level: 4,  avatar_url: '/avatar_2.png', is_banned: false, created_at: now, updated_at: now },
+    { id: 'd15', username: 'nico_hulkenberg',  email: 'nico@demo.com',     bio: null, reputation_points: 350,  level: 3,  avatar_url: '/avatar_3.png', is_banned: false, created_at: now, updated_at: now },
+    { id: 'd16', username: 'kevin_magnussen',  email: 'kevin@demo.com',    bio: null, reputation_points: 290,  level: 3,  avatar_url: '/avatar_4.png', is_banned: false, created_at: now, updated_at: now },
+  ];
+})();
+
 const Home: React.FC = () => {
   const navigate = useNavigate();
   const { openLogin, openRegister } = useAuthModal();
+  const dispatch = useAppDispatch();
   const [posts, setPosts]             = useState<Post[]>([]);
   const [trendingPosts, setTrending]  = useState<Post[]>([]);
   const [categories, setCategories]   = useState<Category[]>([]);
@@ -27,6 +53,7 @@ const Home: React.FC = () => {
   const [leaderboardUsers, setLeaderboardUsers] = useState<User[]>([]);
   const [loading, setLoading]         = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [reportTarget, setReportTarget] = useState<{ id: string; type: 'post' | 'comment' } | null>(null);
   const user = authService.getCurrentUser();
 
   const fetchPosts = async () => {
@@ -44,7 +71,18 @@ const Home: React.FC = () => {
           tagService.getTags(),
           userService.getLeaderboard(),
         ]);
-        setPosts(p); setTrending(t); setCategories(c); setTags(tg); setLeaderboardUsers(lb);
+        setPosts(p); setTrending(t); setCategories(c); setTags(tg);
+
+        // Merge with dummy data (same logic as Leaderboard page)
+        const merged = [...lb];
+        const remaining = 16 - merged.length;
+        if (remaining > 0) {
+          const existingUsernames = new Set(merged.map(u => u.username));
+          const filtered = DUMMY_CONTRIBUTORS.filter(u => !existingUsernames.has(u.username));
+          merged.push(...filtered.slice(0, remaining));
+        }
+        merged.sort((a, b) => (b.reputation_points || 0) - (a.reputation_points || 0));
+        setLeaderboardUsers(merged);
       } catch (err) { console.error(err); }
       finally { setLoading(false); }
     };
@@ -59,12 +97,12 @@ const Home: React.FC = () => {
 
   const handleVote = (postId: string, type: 'upvote' | 'downvote') =>
     requireLogin(async () => {
-      try { await interactionService.vote(postId, 'post', type); await fetchPosts(); } catch { /* */ }
+      try { await interactionService.vote(postId, 'post', type); await fetchPosts(); dispatch(fetchCurrentUser()); } catch { /* */ }
     });
 
   const handleLike = (postId: string) =>
     requireLogin(async () => {
-      try { await interactionService.toggleLike(postId, 'post'); await fetchPosts(); } catch { /* */ }
+      try { await interactionService.toggleLike(postId, 'post'); await fetchPosts(); dispatch(fetchCurrentUser()); } catch { /* */ }
     });
 
   const handleBookmark = (postId: string) =>
@@ -73,10 +111,8 @@ const Home: React.FC = () => {
     });
 
   const handleReport = (postId: string) =>
-    requireLogin(async () => {
-      const reason = window.prompt('Alasan melaporkan post ini?');
-      if (!reason) return;
-      try { await reportService.submitReport(postId, 'post', reason); alert('Laporan terkirim!'); } catch { /* */ }
+    requireLogin(() => {
+      setReportTarget({ id: postId, type: 'post' });
     });
 
   const handleSearch = (e: React.FormEvent) => {
@@ -88,6 +124,16 @@ const Home: React.FC = () => {
 
   return (
     <Layout>
+      <ReportModal
+        isOpen={!!reportTarget}
+        targetType={reportTarget?.type ?? 'post'}
+        targetId={reportTarget?.id ?? ''}
+        onClose={() => setReportTarget(null)}
+        onSubmit={async (reason) => {
+          if (!reportTarget) return;
+          await reportService.submitReport(reportTarget.id, reportTarget.type, reason);
+        }}
+      />
       <div className="home-grid">
         {/* ── FEED ── */}
         <div className="posts-section">
@@ -187,7 +233,7 @@ const Home: React.FC = () => {
             <div className="sidebar-card">
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--sp-4)' }}>
                 <p className="sidebar-title" style={{ display: 'flex', alignItems: 'center', gap: 6, margin: 0 }}>
-                  <Trophy size={13} strokeWidth={2.5} style={{ color: '#f59e0b' }} /> Leaderboard
+                  <Trophy size={13} strokeWidth={2.5} style={{ color: '#ffd700' }} /> Leaderboard
                 </p>
                 <Link to="/leaderboard" style={{ fontSize: '0.72rem', fontWeight: 600, color: 'var(--primary)', textDecoration: 'none' }}>
                   View All
@@ -199,7 +245,7 @@ const Home: React.FC = () => {
                 {leaderboardUsers[1] && (
                   <div className="mini-podium-col rank-2" data-rank="2">
                     <div className="mini-podium-badge">
-                      <Medal size={15} style={{ color: '#94a3b8' }} />
+                      <Medal size={15} style={{ color: '#c0c0c0' }} />
                     </div>
                     <div className="podium-avatar-wrap">
                       <div className="mini-podium-avatar">
@@ -223,7 +269,7 @@ const Home: React.FC = () => {
                 {leaderboardUsers[0] && (
                   <div className="mini-podium-col rank-1" data-rank="1">
                     <div className="mini-podium-badge">
-                      <Trophy size={17} style={{ color: '#f59e0b' }} />
+                      <Trophy size={17} style={{ color: '#ffd700' }} />
                     </div>
                     <div className="podium-avatar-wrap">
                       <span className="podium-crown">👑</span>
@@ -248,7 +294,7 @@ const Home: React.FC = () => {
                 {leaderboardUsers[2] && (
                   <div className="mini-podium-col rank-3" data-rank="3">
                     <div className="mini-podium-badge">
-                      <Medal size={14} style={{ color: '#f97316' }} />
+                      <Medal size={14} style={{ color: '#cd7f32' }} />
                     </div>
                     <div className="podium-avatar-wrap">
                       <div className="mini-podium-avatar">
