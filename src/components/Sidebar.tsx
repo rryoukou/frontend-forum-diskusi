@@ -4,7 +4,7 @@ import * as Avatar from '@radix-ui/react-avatar';
 import {
   Home, Trophy, Search, PenLine, User, Bookmark,
   Bell, TrendingUp, Flag, ScrollText, Users, FolderOpen,
-  LogOut, ChevronDown, X,
+  LogOut, ChevronDown, X, LayoutDashboard, ShieldAlert // 👈 Tambahkan ShieldAlert di sini
 } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { logoutUser } from '../store/authSlice';
@@ -75,8 +75,9 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
     }
   };
 
+  // Logika pengecekan rute aktif agar akurat mencocokkan sub-route admin
   const isActive = (path: string) =>
-    path === '/' ? location.pathname === '/' : location.pathname.startsWith(path);
+    path === '/' ? location.pathname === path : location.pathname.startsWith(path);
 
   return (
     <>
@@ -152,7 +153,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
 
           {/* MAIN */}
           <div className="sidebar__section-label">Main</div>
-          <SidebarLink to="/"            icon={<Home   size={15} />} active={isActive('/')}            onClick={onClose}>Home</SidebarLink>
+          <SidebarLink to="/"             icon={<Home   size={15} />} active={location.pathname === '/'} onClick={onClose}>Home</SidebarLink>
           <SidebarLink to="/leaderboard" icon={<Trophy size={15} />} active={isActive('/leaderboard')} onClick={onClose}>Leaderboard</SidebarLink>
           <SidebarLink to="/search"      icon={<Search size={15} />} active={isActive('/search')}      onClick={onClose}>Search</SidebarLink>
 
@@ -205,9 +206,11 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           {isAdmin && (
             <>
               <div className="sidebar__section-label">Admin</div>
-              <SidebarLink to="/admin"            icon={<Users      size={15} />} active={isActive('/admin')}            onClick={onClose}>Manage Users</SidebarLink>
-              <SidebarLink to="/admin/categories" icon={<FolderOpen size={15} />} active={isActive('/admin/categories')} onClick={onClose}>Categories</SidebarLink>
-            </>
+              <SidebarLink to="/admin"             icon={<LayoutDashboard size={15} />} active={location.pathname === '/admin' || location.pathname === '/admin/dashboard'} onClick={onClose}>Dashboard</SidebarLink>
+              <SidebarLink to="/admin/categories" icon={<FolderOpen      size={15} />} active={location.pathname === '/admin/categories'}  onClick={onClose}>Categories</SidebarLink>
+              {/* 👈 Navigasi Tambahan Baru untuk Management Roles */}
+<SidebarLink to="/admin/roles"      icon={<ShieldAlert     size={15} />} active={isActive('/admin/roles')}       onClick={onClose}>Manage Roles</SidebarLink>
+  </>            
           )}
         </nav>
 
