@@ -19,22 +19,14 @@ function useAdminDashboard() {
     const fetchData = async () => {
       try {
         setLoading(true);
+        // Panggil stats dari backend untuk angka ringkasan
+        const statsData = await userService.getAdminStats();
+        setStats(statsData);
+
+        // Panggil daftar user untuk tabel
         const usersData = await userService.getAdminUsers();
-        
         const usersList: User[] = usersData?.data || [];
         setUsers(usersList);
-
-        const totalUsers = usersList.filter(user => user && !user.is_banned).length;
-        const adminUsers = usersList.filter(user => user?.roles?.some(r => r.name === 'admin')).length;
-        const moderatorUsers = usersList.filter(user => user?.roles?.some(r => r.name === 'moderator')).length;
-        const reportCount = Math.floor(Math.random() * 15) + 5; 
-
-        setStats({
-          totalUsers,
-          adminUsers,
-          moderatorUsers,
-          reportCount
-        });
       } catch (error) {
         console.error('Failed to fetch dashboard stats from API', error);
       } finally {

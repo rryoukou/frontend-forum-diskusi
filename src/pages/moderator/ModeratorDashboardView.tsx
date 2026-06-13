@@ -64,6 +64,23 @@ const ModeratorDashboardView: React.FC<ModeratorDashboardViewProps> = ({
   handleBanUser,
   handleUnbanUser,
 }) => {
+  // Styles inline untuk merapikan layout internal card statistik
+  const cardContentStyle: React.CSSProperties = {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+    justifyContent: 'center',
+    gap: '4px',
+    width: '100%'
+  };
+
+  const valueStyle: React.CSSProperties = {
+    fontSize: '2rem',
+    fontWeight: 'bold',
+    lineHeight: 1,
+    margin: '4px 0'
+  };
+
   return (
     <ModeratorLayout>
       <div style={{ marginBottom: 'var(--sp-6)' }}>
@@ -83,58 +100,67 @@ const ModeratorDashboardView: React.FC<ModeratorDashboardViewProps> = ({
         className="admin-stats-grid"
         style={{ marginBottom: 'var(--sp-8)' }}
       >
+        {/* CARD 1: PENDING */}
         <div className="admin-stat-card danger">
-          <span className="admin-stat-icon">
-            <FileText
-              size={28}
-              strokeWidth={1.8}
-              style={{ color: 'var(--danger)' }}
-            />
-          </span>
-          <span
-            className="admin-stat-value"
-            style={{ color: 'var(--danger)' }}
-          >
-            {pendingCount}
-          </span>
-          <span className="admin-stat-label">
-            Pending Reports
-          </span>
+          <div style={cardContentStyle}>
+            <span className="admin-stat-icon">
+              <FileText
+                size={28}
+                strokeWidth={1.8}
+                style={{ color: 'var(--danger)' }}
+              />
+            </span>
+            <span
+              className="admin-stat-value"
+              style={{ ...valueStyle, color: 'var(--danger)' }}
+            >
+              {pendingCount}
+            </span>
+            <span className="admin-stat-label" style={{ margin: 0 }}>
+              Pending Reports
+            </span>
+          </div>
         </div>
 
+        {/* CARD 2: RESOLVED */}
         <div className="admin-stat-card success">
-          <span className="admin-stat-icon">
-            <CheckCircle2
-              size={28}
-              strokeWidth={1.8}
-              style={{ color: 'var(--success)' }}
-            />
-          </span>
-          <span
-            className="admin-stat-value"
-            style={{ color: 'var(--success)' }}
-          >
-            {resolvedCount}
-          </span>
-          <span className="admin-stat-label">
-            Resolved
-          </span>
+          <div style={cardContentStyle}>
+            <span className="admin-stat-icon">
+              <CheckCircle2
+                size={28}
+                strokeWidth={1.8}
+                style={{ color: 'var(--success)' }}
+              />
+            </span>
+            <span
+              className="admin-stat-value"
+              style={{ ...valueStyle, color: 'var(--success)' }}
+            >
+              {resolvedCount}
+            </span>
+            <span className="admin-stat-label" style={{ margin: 0 }}>
+              Resolved
+            </span>
+          </div>
         </div>
 
+        {/* CARD 3: TOTAL */}
         <div className="admin-stat-card">
-          <span className="admin-stat-icon">
-            <BarChart3
-              size={28}
-              strokeWidth={1.8}
-              style={{ color: 'var(--primary)' }}
-            />
-          </span>
-          <span className="admin-stat-value">
-            {reports.length}
-          </span>
-          <span className="admin-stat-label">
-            Total Reports
-          </span>
+          <div style={cardContentStyle}>
+            <span className="admin-stat-icon">
+              <BarChart3
+                size={28}
+                strokeWidth={1.8}
+                style={{ color: 'var(--primary)' }}
+              />
+            </span>
+            <span className="admin-stat-value" style={valueStyle}>
+              {reports.length}
+            </span>
+            <span className="admin-stat-label" style={{ margin: 0 }}>
+              Total Reports
+            </span>
+          </div>
         </div>
       </div>
 

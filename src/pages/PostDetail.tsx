@@ -107,9 +107,14 @@ const CommentItem: React.FC<CommentItemProps> = ({
           <button onClick={() => onLike(comment.id)} className="comment-action-btn">
             <Heart size={13} strokeWidth={2.5} /> {comment.likes_count ? comment.likes_count : null}
           </button>
-          <button onClick={() => onReply(comment)} className="comment-action-btn">
-            <CornerUpLeft size={13} strokeWidth={2.5} /> Reply
-          </button>
+          
+          {/* HANYA BOLEH REPLY SEKALI & TIDAK BOLEH NESTED REPLY */}
+          {!comment.parent_id && (!comment.children || comment.children.length === 0) && (
+            <button onClick={() => onReply(comment)} className="comment-action-btn">
+              <CornerUpLeft size={13} strokeWidth={2.5} /> Reply
+            </button>
+          )}
+
           <button type="button" onClick={() => onReport(comment.id, 'comment')} className="comment-action-btn danger">
             <Flag size={13} strokeWidth={2.5} /> Report
           </button>

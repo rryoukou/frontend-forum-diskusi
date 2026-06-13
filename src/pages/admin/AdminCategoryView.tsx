@@ -133,7 +133,7 @@ const AdminCategoryView: React.FC<AdminCategoryViewProps> = ({
     borderRadius: 'var(--radius-lg)',
     border: '1.5px solid var(--border)',
     boxShadow: 'var(--shadow-card)',
-    padding: '1.25rem',
+    padding: '1.5rem',
     width: '100%',
     boxSizing: 'border-box',
   };
@@ -142,12 +142,14 @@ const AdminCategoryView: React.FC<AdminCategoryViewProps> = ({
     background: 'var(--surface-2)',
     border: '1.5px solid var(--border)',
     borderRadius: 'var(--radius)',
-    padding: '0.75rem 1rem',
+    padding: '0px 1rem',
     fontSize: '0.9rem',
     color: 'var(--text-1)',
     width: '100%',
     boxSizing: 'border-box',
-    height: 42,
+    height: 44,
+    display: 'flex',
+    alignItems: 'center',
     overflow: 'hidden',
     textOverflow: 'ellipsis',
     whiteSpace: 'nowrap',
@@ -171,51 +173,68 @@ const AdminCategoryView: React.FC<AdminCategoryViewProps> = ({
       {/* ═══════ LEFT PANEL — Category List ═══════ */}
       <div style={{ width: 360, minWidth: 360, flexShrink: 0, display: 'flex', flexDirection: 'column', gap: '1.25rem', position: 'sticky', top: 24, alignSelf: 'flex-start' }}>
         <div>
-          <h1 style={{ margin: 0, fontSize: 'clamp(1.5rem,3vw,2rem)', fontWeight: 800, letterSpacing: '-0.02em' }}>Manage Categories</h1>
+          <h1 style={{ margin: 0, fontSize: '1.75rem', fontWeight: 800, letterSpacing: '-0.02em' }}>Categories</h1>
           <p style={{ marginTop: 4, fontSize: '0.85rem', color: 'var(--text-3)' }}>Configure categories, metadata, and content settings</p>
         </div>
 
         {/* Quick Stats Card */}
         <div style={cardStyle}>
-          <h3 style={{ margin: 0, fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-1)' }}>Categories</h3>
+          <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 700, color: 'var(--text-1)' }}>Summary Overview</h3>
           <p style={{ marginTop: 2, fontSize: '0.75rem', color: 'var(--text-3)' }}>Manage and organize content categories</p>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.5rem', marginTop: '1rem' }}>
-            <div style={{ textAlign: 'center', background: 'var(--surface-2)', borderRadius: 'var(--radius)', border: '1.5px solid var(--border)', padding: '0.6rem 0.4rem' }}>
-              <div style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--primary)' }}>{totalCategories}</div>
-              <div style={{ fontSize: '0.65rem', color: 'var(--text-3)', textTransform: 'uppercase' }}>Total</div>
+            <div style={{ textAlign: 'center', background: 'var(--surface-2)', borderRadius: 'var(--radius)', border: '1.5px solid var(--border)', padding: '0.75rem 0.4rem' }}>
+              <div style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--success)' }}>{totalCategories}</div>
+              <div style={{ fontSize: '0.65rem', color: 'var(--text-3)', textTransform: 'uppercase', fontWeight: 600, marginTop: 2 }}>Total</div>
             </div>
-            <div style={{ textAlign: 'center', background: 'var(--surface-2)', borderRadius: 'var(--radius)', border: '1.5px solid var(--border)', padding: '0.6rem 0.4rem' }}>
-              <div style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--info)' }}>{topLevelCategories}</div>
-              <div style={{ fontSize: '0.65rem', color: 'var(--text-3)', textTransform: 'uppercase' }}>Parent</div>
+            <div style={{ textAlign: 'center', background: 'var(--surface-2)', borderRadius: 'var(--radius)', border: '1.5px solid var(--border)', padding: '0.75rem 0.4rem' }}>
+              <div style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--info)' }}>{topLevelCategories}</div>
+              <div style={{ fontSize: '0.65rem', color: 'var(--text-3)', textTransform: 'uppercase', fontWeight: 600, marginTop: 2 }}>Parent</div>
             </div>
-            <div style={{ textAlign: 'center', background: 'var(--surface-2)', borderRadius: 'var(--radius)', border: '1.5px solid var(--border)', padding: '0.6rem 0.4rem' }}>
-              <div style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--warning)' }}>{subCategories}</div>
-              <div style={{ fontSize: '0.65rem', color: 'var(--text-3)', textTransform: 'uppercase' }}>Sub</div>
+            <div style={{ textAlign: 'center', background: 'var(--surface-2)', borderRadius: 'var(--radius)', border: '1.5px solid var(--border)', padding: '0.75rem 0.4rem' }}>
+              <div style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--warning)' }}>{subCategories}</div>
+              <div style={{ fontSize: '0.65rem', color: 'var(--text-3)', textTransform: 'uppercase', fontWeight: 600, marginTop: 2 }}>Sub</div>
             </div>
           </div>
 
-          <button className="btn-primary" style={{ marginTop: '1rem', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }} onClick={() => handleOpenModal()}>
-            <Plus size={14} strokeWidth={3} /> Add Category
+          <button 
+            className="btn-primary" 
+            style={{ 
+              marginTop: '1.25rem', 
+              width: '100%', 
+              height: 44,
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center', 
+              gap: 8,
+              fontSize: '0.9rem',
+              fontWeight: 700,
+              borderRadius: 'var(--radius)',
+              cursor: 'pointer',
+              border: 'none',
+              boxShadow: '0 4px 12px rgba(16, 185, 129, 0.2)'
+            }} 
+            onClick={() => handleOpenModal()}
+          >
+            <Plus size={16} strokeWidth={3} /> Add New Category
           </button>
         </div>
 
         {/* Search */}
         <div style={{ position: 'relative' }}>
-          <Search size={14} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-3)' }} />
+          <Search size={14} style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-3)' }} />
           <input
             type="text"
             placeholder="Search categories..."
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
-            style={{ width: '100%', background: 'var(--surface)', border: '1.5px solid var(--border)', borderRadius: 'var(--radius)', padding: '0.55rem 0.75rem 0.55rem 2.2rem', fontSize: '0.8rem', color: 'var(--text-1)', outline: 'none', boxSizing: 'border-box' }}
+            style={{ width: '100%', height: 40, background: 'var(--surface)', border: '1.5px solid var(--border)', borderRadius: 'var(--radius)', padding: '0px 0.75rem 0px 2.4rem', fontSize: '0.85rem', color: 'var(--text-1)', outline: 'none', boxSizing: 'border-box' }}
           />
         </div>
 
         {/* Categories List */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 6, maxHeight: 'calc(100vh - 440px)', overflowY: 'auto' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6, maxHeight: 'calc(100vh - 440px)', overflowY: 'auto', paddingRight: 2 }}>
           {loading ? (
-            // Merender 5 baris skeleton loading ketika status loading aktif
             <>
               <CategorySkeleton />
               <CategorySkeleton />
@@ -224,9 +243,9 @@ const AdminCategoryView: React.FC<AdminCategoryViewProps> = ({
               <CategorySkeleton />
             </>
           ) : filteredCategories.length === 0 ? (
-            <div className="empty-state">
+            <div className="empty-state" style={{ padding: '2rem 1rem' }}>
               <FolderTree size={36} style={{ margin: '0 auto 8px', opacity: 0.4 }} />
-              <p>No categories found</p>
+              <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-3)' }}>No categories found</p>
             </div>
           ) : (
             filteredCategories.map(cat => {
@@ -250,14 +269,14 @@ const AdminCategoryView: React.FC<AdminCategoryViewProps> = ({
                     <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-1)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                       {cat.parent_id ? '↳ ' : ''}{cat.name}
                     </div>
-                    <div style={{ fontSize: '0.7rem', color: 'var(--text-3)', marginTop: 2 }}>
-                      {cat.children?.length ? `${cat.children.length} sub-category` : 'Top-level'}
+                    <div style={{ fontSize: '0.7°Crem', color: 'var(--text-3)', marginTop: 2 }}>
+                      {cat.children?.length ? `${cat.children.length} sub-categories` : 'Top-level'}
                     </div>
                   </div>
 
-                  <div style={{ display: 'flex', gap: 2, flexShrink: 0, opacity: 0.5 }}>
-                    <button onClick={e => { e.stopPropagation(); handleOpenModal(cat); }} style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-2)' }}><Pencil size={13} /></button>
-                    <button onClick={e => { e.stopPropagation(); handleDelete(cat.id); }} style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--danger)' }}><Trash2 size={13} /></button>
+                  <div style={{ display: 'flex', gap: 4, flexShrink: 0, opacity: 0.6 }}>
+                    <button onClick={e => { e.stopPropagation(); handleOpenModal(cat); }} style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-2)', padding: 4 }}><Pencil size={13} /></button>
+                    <button onClick={e => { e.stopPropagation(); handleDelete(cat.id); }} style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--danger)', padding: 4 }}><Trash2 size={13} /></button>
                   </div>
                 </div>
               );
@@ -269,60 +288,77 @@ const AdminCategoryView: React.FC<AdminCategoryViewProps> = ({
       {/* ═══════ RIGHT PANEL — Category Details ═══════ */}
       <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '1.25rem', minHeight: 'calc(100vh - 120px)', alignSelf: 'flex-start' }}>
         {selectedCategory ? (
-          <div style={{ ...cardStyle, padding: '1.5rem' }}>
-            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', borderBottom: '1.5px solid var(--border)', paddingBottom: '1.25rem', marginBottom: '1.25rem' }}>
+          <div style={{ ...cardStyle, padding: '1.75rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1.5px solid var(--border)', paddingBottom: '1.25rem', marginBottom: '1.5rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-                <div style={{ width: 48, height: 48, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 12, fontSize: '1.5rem', ...getCategoryIconStyle(selectedCategory.name) }}>
+                <div style={{ width: 52, height: 52, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 14, fontSize: '1.6rem', ...getCategoryIconStyle(selectedCategory.name) }}>
                   {getCategoryIcon(selectedCategory.name)}
                 </div>
                 <div>
-                  <h2 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 700 }}>{selectedCategory.name}</h2>
-                  <span style={{ fontSize: '0.75rem', fontFamily: 'monospace', color: 'var(--text-3)' }}>/ {selectedCategory.slug}</span>
+                  <h2 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 700, color: 'var(--text-1)' }}>{selectedCategory.name}</h2>
+                  <span style={{ fontSize: '0.75rem', fontFamily: 'monospace', color: 'var(--primary)', marginTop: 2, display: 'inline-block' }}>slug: /{selectedCategory.slug}</span>
                 </div>
               </div>
               <div style={{ display: 'flex', gap: 8 }}>
-                <button className="admin-action-btn promote" onClick={() => handleOpenModal(selectedCategory)}><Pencil size={12} /> Edit</button>
-                <button className="admin-action-btn ban" onClick={() => handleDelete(selectedCategory.id)}><Trash2 size={12} /> Delete</button>
+                <button className="admin-action-btn promote" style={{ height: 34, padding: '0 12px', display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.8rem', fontWeight: 650, cursor: 'pointer' }} onClick={() => handleOpenModal(selectedCategory)}><Pencil size={12} /> Edit</button>
+                <button className="admin-action-btn ban" style={{ height: 34, padding: '0 12px', display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.8rem', fontWeight: 650, cursor: 'pointer' }} onClick={() => handleDelete(selectedCategory.id)}><Trash2 size={12} /> Delete</button>
               </div>
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
               <div>
                 <label style={fieldLabelStyle}><Tag size={12} /> Category Name</label>
-                <div style={{ ...fieldBoxStyle, fontWeight: 500 }}>{selectedCategory.name}</div>
+                <div style={{ ...fieldBoxStyle, fontWeight: 600 }}>{selectedCategory.name}</div>
               </div>
 
               <div>
-                <label style={fieldLabelStyle}><Link2 size={12} /> Slug</label>
-                <div style={{ ...fieldBoxStyle, fontFamily: 'monospace', color: 'var(--primary)' }}>/{selectedCategory.slug}</div>
+                <label style={fieldLabelStyle}><Link2 size={12} /> Route Slug</label>
+                <div style={{ ...fieldBoxStyle, fontFamily: 'monospace', color: 'var(--primary)', fontWeight: 500 }}>/{selectedCategory.slug}</div>
               </div>
 
               <div>
                 <label style={fieldLabelStyle}><FileText size={12} /> Description</label>
-                <div style={{ ...fieldBoxStyle, color: 'var(--text-2)', height: 66, whiteSpace: 'normal', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-                  {selectedCategory.description || <span style={{ fontStyle: 'italic', color: 'var(--text-3)' }}>No description available</span>}
+                <div style={{ 
+                  background: 'var(--surface-2)',
+                  border: '1.5px solid var(--border)',
+                  borderRadius: 'var(--radius)',
+                  padding: '0.75rem 1rem',
+                  fontSize: '0.9rem',
+                  color: 'var(--text-2)',
+                  width: '100%',
+                  boxSizing: 'border-box',
+                  minHeight: 76, 
+                  lineHeight: '1.5',
+                  display: 'block',
+                  overflow: 'hidden'
+                }}>
+                  {selectedCategory.description || <span style={{ fontStyle: 'italic', color: 'var(--text-3)' }}>No description available for this category.</span>}
                 </div>
               </div>
 
               <div>
-                <label style={fieldLabelStyle}><ArrowUpRight size={12} /> Parent Category</label>
+                <label style={fieldLabelStyle}><ArrowUpRight size={12} /> Parent Hierarchy</label>
                 <div style={fieldBoxStyle}>
-                  {selectedCategory.parent_id ? categories.find(c => c.id === selectedCategory.parent_id)?.name || selectedCategory.parent_id : <span style={{ fontStyle: 'italic', color: 'var(--text-3)' }}>None (Top-level category)</span>}
+                  {selectedCategory.parent_id ? (
+                    <span style={{ fontWeight: 500 }}>{categories.find(c => c.id === selectedCategory.parent_id)?.name || selectedCategory.parent_id}</span>
+                  ) : (
+                    <span style={{ fontStyle: 'italic', color: 'var(--text-3)', fontSize: '0.85rem' }}>None (This is a root top-level category)</span>
+                  )}
                 </div>
               </div>
 
               <div>
-                <label style={fieldLabelStyle}><Calendar size={12} /> Created</label>
+                <label style={fieldLabelStyle}><Calendar size={12} /> Date Created</label>
                 <div style={fieldBoxStyle}>
-                  {new Date(selectedCategory.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                  {new Date(selectedCategory.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
                 </div>
               </div>
             </div>
           </div>
         ) : (
-          <div className="empty-state" style={{ minHeight: 480, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-            <FolderTree size={48} style={{ margin: '0 auto 12px', opacity: 0.35 }} />
-            <p>Select a category to view details</p>
+          <div className="empty-state" style={{ minHeight: 480, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'var(--surface)', border: '1.5px solid var(--border)', borderRadius: 'var(--radius-lg)' }}>
+            <FolderTree size={44} style={{ margin: '0 auto 12px', opacity: 0.3 }} />
+            <p style={{ color: 'var(--text-3)', fontSize: '0.9rem', margin: 0 }}>Select a category from the left panel to view full configuration details</p>
           </div>
         )}
       </div>
@@ -330,22 +366,22 @@ const AdminCategoryView: React.FC<AdminCategoryViewProps> = ({
       {/* ═══════ MODAL (Radix UI Dialog + Formik) ═══════ */}
       <Dialog.Root open={isModalOpen} onOpenChange={open => !open && handleCloseModal()}>
         <Dialog.Portal>
-          <Dialog.Overlay style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(4px)', zIndex: 100 }} />
+          <Dialog.Overlay style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)', zIndex: 100 }} />
           <Dialog.Content 
             aria-describedby={undefined}
-            style={{ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: '100%', maxWidth: 460, background: 'var(--surface)', border: '1.5px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: '1.5rem', boxSizing: 'border-box', zIndex: 101 }}
+            style={{ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: '100%', maxWidth: 460, background: 'var(--surface)', border: '1.5px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: '1.75rem', boxSizing: 'border-box', zIndex: 101, boxShadow: '0 20px 25px -5px rgba(0,0,0,0.5)' }}
           >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
-              <Dialog.Title style={{ margin: 0, fontSize: '1.1rem', fontWeight: 700 }}>
-                {editingCategory ? 'Edit Category' : 'Add New Category'}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+              <Dialog.Title style={{ margin: 0, fontSize: '1.15rem', fontWeight: 700, color: 'var(--text-1)' }}>
+                {editingCategory ? 'Edit Existing Category' : 'Create New Category'}
               </Dialog.Title>
               <Dialog.Close asChild>
-                <button style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-3)' }}><X size={16} /></button>
+                <button style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-3)', padding: 4 }}><X size={16} /></button>
               </Dialog.Close>
             </div>
 
             {error && (
-              <div style={{ padding: '0.75rem', marginBottom: '1rem', background: 'var(--danger-light)', borderRadius: 'var(--radius)', fontSize: '0.8rem', color: 'var(--danger)', border: '1.5px solid rgba(255,77,106,0.2)' }}>
+              <div style={{ padding: '0.75rem 1rem', marginBottom: '1.25rem', background: 'var(--danger-light)', borderRadius: 'var(--radius)', fontSize: '0.8rem', color: 'var(--danger)', border: '1.5px solid rgba(255,77,106,0.2)', fontWeight: 500 }}>
                 {error}
               </div>
             )}
@@ -363,14 +399,14 @@ const AdminCategoryView: React.FC<AdminCategoryViewProps> = ({
               enableReinitialize
             >
               {({ setFieldValue, values }) => (
-                <Form style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <Form style={{ display: 'flex', flexDirection: 'column', gap: '1.15rem' }}>
                   
                   <div>
-                    <label style={fieldLabelStyle}>Name</label>
+                    <label style={fieldLabelStyle}>Category Name</label>
                     <Field
                       name="name"
                       placeholder="e.g. Cardiovascular"
-                      style={{ width: '100%', background: 'var(--surface-2)', border: '1.5px solid var(--border)', borderRadius: 'var(--radius)', padding: '0.65rem 1rem', fontSize: '0.9rem', color: 'var(--text-1)', outline: 'none', boxSizing: 'border-box' }}
+                      style={{ width: '100%', height: 42, background: 'var(--surface-2)', border: '1.5px solid var(--border)', borderRadius: 'var(--radius)', padding: '0px 1rem', fontSize: '0.9rem', color: 'var(--text-1)', outline: 'none', boxSizing: 'border-box' }}
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                         setFieldValue('name', e.target.value);
                         if (!editingCategory) {
@@ -378,37 +414,51 @@ const AdminCategoryView: React.FC<AdminCategoryViewProps> = ({
                         }
                       }}
                     />
-                    <ErrorMessage name="name" component="div" style={{ color: 'var(--danger)', fontSize: '0.75rem', marginTop: 4 }} />
+                    {/* PERBAIKAN: Menggunakan Render Props Pattern agar TypeScript tidak komplain */}
+                    <ErrorMessage name="name">
+                      {(msg) => (
+                        <div style={{ color: 'var(--danger)', fontSize: '0.75rem', marginTop: 5, fontWeight: 500 }}>
+                          {msg}
+                        </div>
+                      )}
+                    </ErrorMessage>
                   </div>
 
                   <div>
-                    <label style={fieldLabelStyle}>Slug</label>
-                    <Field name="slug" placeholder="e.g. cardiovascular" style={{ width: '100%', background: 'var(--surface-2)', border: '1.5px solid var(--border)', borderRadius: 'var(--radius)', padding: '0.65rem 1rem', fontFamily: 'monospace', fontSize: '0.9rem', color: 'var(--text-1)', outline: 'none', boxSizing: 'border-box' }} />
-                    <ErrorMessage name="slug" component="div" style={{ color: 'var(--danger)', fontSize: '0.75rem', marginTop: 4 }} />
+                    <label style={fieldLabelStyle}>Url Slug</label>
+                    <Field name="slug" placeholder="e.g. cardiovascular" style={{ width: '100%', height: 42, background: 'var(--surface-2)', border: '1.5px solid var(--border)', borderRadius: 'var(--radius)', padding: '0px 1rem', fontFamily: 'monospace', fontSize: '0.9rem', color: 'var(--text-1)', outline: 'none', boxSizing: 'border-box' }} />
+                    {/* PERBAIKAN: Menggunakan Render Props Pattern agar TypeScript tidak komplain */}
+                    <ErrorMessage name="slug">
+                      {(msg) => (
+                        <div style={{ color: 'var(--danger)', fontSize: '0.75rem', marginTop: 5, fontWeight: 500 }}>
+                          {msg}
+                        </div>
+                      )}
+                    </ErrorMessage>
                   </div>
 
                   <div>
                     <label style={fieldLabelStyle}>Description (Optional)</label>
-                    <Field name="description" as="textarea" rows={3} placeholder="Brief description..." style={{ width: '100%', background: 'var(--surface-2)', border: '1.5px solid var(--border)', borderRadius: 'var(--radius)', padding: '0.65rem 1rem', fontSize: '0.9rem', color: 'var(--text-1)', outline: 'none', resize: 'none', boxSizing: 'border-box' }} />
+                    <Field name="description" as="textarea" rows={3} placeholder="Provide a brief context or topic scope..." style={{ width: '100%', background: 'var(--surface-2)', border: '1.5px solid var(--border)', borderRadius: 'var(--radius)', padding: '0.65rem 1rem', fontSize: '0.9rem', color: 'var(--text-1)', outline: 'none', resize: 'none', boxSizing: 'border-box', lineHeight: '1.4' }} />
                   </div>
 
                   <div>
-                    <label style={fieldLabelStyle}>Parent Category</label>
+                    <label style={fieldLabelStyle}>Parent Assignment</label>
                     <Select.Root value={values.parent_id} onValueChange={(val) => setFieldValue('parent_id', val)}>
-                      <Select.Trigger style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', background: 'var(--surface-2)', border: '1.5px solid var(--border)', borderRadius: 'var(--radius)', padding: '0.65rem 1rem', fontSize: '0.9rem', color: 'var(--text-1)', height: 42, boxSizing: 'border-box', cursor: 'pointer' }}>
+                      <Select.Trigger style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', background: 'var(--surface-2)', border: '1.5px solid var(--border)', borderRadius: 'var(--radius)', padding: '0px 1rem', fontSize: '0.9rem', color: 'var(--text-1)', height: 42, boxSizing: 'border-box', cursor: 'pointer', outline: 'none' }}>
                         <Select.Value placeholder="None (Top-level)" />
-                        <Select.Icon><ChevronDown size={14} /></Select.Icon>
+                        <Select.Icon style={{ display: 'flex', alignItems: 'center' }}><ChevronDown size={14} /></Select.Icon>
                       </Select.Trigger>
                       <Select.Portal>
-                        <Select.Content style={{ background: 'var(--surface)', border: '1.5px solid var(--border)', borderRadius: 'var(--radius)', padding: 4, boxShadow: 'var(--shadow-card)', zIndex: 200 }}>
+                        <Select.Content style={{ background: 'var(--surface)', border: '1.5px solid var(--border)', borderRadius: 'var(--radius)', padding: 5, boxShadow: '0 10px 15px -3px rgba(0,0,0,0.3)', zIndex: 200, minWidth: 200 }}>
                           <Select.Viewport>
-                            <Select.Item value="none" style={{ padding: '0.5rem 1rem', fontSize: '0.9rem', color: 'var(--text-1)', borderRadius: 'var(--radius-sm)', cursor: 'pointer', outline: 'none' }}>
+                            <Select.Item value="none" style={{ padding: '0.55rem 1rem', fontSize: '0.85rem', color: 'var(--text-2)', borderRadius: 'var(--radius-sm)', cursor: 'pointer', outline: 'none', display: 'flex', alignItems: 'center', userSelect: 'none' }}>
                               <Select.ItemText>None (Top-level)</Select.ItemText>
                             </Select.Item>
                             {categories
                               .filter(c => !c.parent_id && c.id !== editingCategory?.id)
                               .map(c => (
-                                <Select.Item key={c.id} value={c.id} style={{ padding: '0.5rem 1rem', fontSize: '0.9rem', color: 'var(--text-1)', borderRadius: 'var(--radius-sm)', cursor: 'pointer', outline: 'none' }}>
+                                <Select.Item key={c.id} value={c.id} style={{ padding: '0.55rem 1rem', fontSize: '0.85rem', color: 'var(--text-1)', borderRadius: 'var(--radius-sm)', cursor: 'pointer', outline: 'none', display: 'flex', alignItems: 'center', userSelect: 'none' }}>
                                   <Select.ItemText>{c.name}</Select.ItemText>
                                 </Select.Item>
                               ))
@@ -419,10 +469,10 @@ const AdminCategoryView: React.FC<AdminCategoryViewProps> = ({
                     </Select.Root>
                   </div>
 
-                  <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, borderTop: '1.5px solid var(--border)', paddingTop: '1.25rem', marginTop: '0.5rem' }}>
-                    <button type="button" className="btn-outline" onClick={handleCloseModal}>Cancel</button>
-                    <button type="submit" className="btn-primary" disabled={submitting}>
-                      {submitting ? 'Saving...' : <><Check size={14} strokeWidth={2.5} /> {editingCategory ? 'Update' : 'Create'}</>}
+                  <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, borderTop: '1.5px solid var(--border)', paddingTop: '1.25rem', marginTop: '0.5rem' }}>
+                    <button type="button" className="btn-outline" style={{ height: 38, padding: '0 16px', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer' }} onClick={handleCloseModal}>Cancel</button>
+                    <button type="submit" className="btn-primary" style={{ height: 38, padding: '0 16px', fontWeight: 600, fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: 6, border: 'none', cursor: 'pointer' }} disabled={submitting}>
+                      {submitting ? 'Saving...' : <><Check size={14} strokeWidth={2.5} /> {editingCategory ? 'Save Changes' : 'Create'}</>}
                     </button>
                   </div>
                 </Form>

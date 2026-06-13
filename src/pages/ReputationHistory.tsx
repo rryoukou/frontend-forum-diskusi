@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Layout from '../layouts/Layout';
+import { Link } from 'react-router-dom';
 import badgeService from '../services/badgeService';
 import type { ReputationLog } from '../services/badgeService';
 import { useAppSelector, useAppDispatch } from '../store/hooks';
@@ -128,6 +129,14 @@ const ReputationHistory: React.FC = () => {
                           </div>
                           {log.description && (
                             <div className="timeline-desc">{log.description}</div>
+                          )}
+                          {log.reference_title && (
+                            <div className="timeline-reference">
+                              <span className="ref-label">Target: </span>
+                              <Link to={`/posts/${log.reference_link_id}`} className="ref-link">
+                                {log.reference_title}
+                              </Link>
+                            </div>
                           )}
                           <div className="timeline-date">
                             <Calendar size={12} style={{ marginRight: 4, display: 'inline-block', verticalAlign: 'middle' }} />

@@ -15,6 +15,9 @@ export interface ReputationLog {
   action_type: string;
   description: string | null;
   created_at: string;
+  reference_title?: string;
+  reference_type?: 'post' | 'comment';
+  reference_link_id?: string;
 }
 
 const badgeService = {

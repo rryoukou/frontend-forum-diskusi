@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import Layout from '../layouts/Layout';
 import notificationService from '../services/notificationService';
+import { resolveAvatar } from '../utils/avatar';
 import {
   ThumbsUp, Heart, Bookmark, MessageCircle, UserPlus,
   AlertTriangle, Bell, CheckCheck,
@@ -38,17 +39,23 @@ const NotificationPage: React.FC = () => {
     catch { console.error('Failed to mark all as read'); }
   };
 
-  const getNotificationText = (notif: any) => {
-    const actor = notif.actor?.username || 'Someone';
-    if (notif.message) return notif.message;
+  const getNotificationContent = (notif: any) => {
+    const actorName = notif.actor?.username || 'Someone';
+    
+    if (notif.message) return <span>{notif.message}</span>;
+
+    const highlight = <strong style={{ color: 'var(--text-1)' }}>{actorName}</strong>;
+
     switch (notif.type) {
-      case 'upvote':            return `${actor} upvoted your post`;
-      case 'like':              return `${actor} liked your content`;
-      case 'bookmark':          return `${actor} bookmarked your post`;
-      case 'comment':           return `${actor} commented on your post`;
-      case 'follow':            return `${actor} started following you`;
-      case 'moderator_warning': return `System: You received a warning`;
-      default:                  return `${actor} interacted with your account`;
+      case 'upvote':            return <span>{highlight} upvoted your post</span>;
+      case 'like':              return <span>{highlight} liked your content</span>;
+      case 'bookmark':          return <span>{highlight} bookmarked your post</span>;
+      case 'comment':           return <span>{highlight} commented on your post</span>;
+      case 'follow':            return <span>{highlight} started following you</span>;
+      case 'answer_accepted':   return <span>{highlight} accepted your answer as the solution</span>;
+      case 'moderator_warning': return <span style={{ color: 'var(--danger)' }}>System: You received a warning</span>;
+      case 'badge_earned':      return <span>Congratulations! You earned a new <strong>Badge</strong></span>;
+      default:                  return <span>{highlight} interacted with your account</span>;
     }
   };
 
@@ -94,11 +101,27 @@ const NotificationPage: React.FC = () => {
                 onClick={() => !notif.is_read && handleMarkAsRead(notif.id)}
                 className={`notif-card${notif.is_read ? '' : ' unread'}`}
               >
-                <div className="notif-icon">
-                  {NOTIF_ICONS[notif.type] || <Bell size={16} strokeWidth={2.2} />}
+                <div className="notif-actor-section">
+                  {notif.actor ? (
+                    <div className="notif-avatar-wrapper">
+                      <img 
+                        src={resolveAvatar(notif.actor.avatar_url) || `https://ui-avatars.com/api/?name=${notif.actor.username}&background=random`} 
+                        alt={notif.actor.username} 
+                        className="notif-actor-avatar"
+                      />
+                      <div className="notif-badge-icon">
+                        {NOTIF_ICONS[notif.type] || <Bell size={10} strokeWidth={2.5} />}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="notif-icon">
+                      {NOTIF_ICONS[notif.type] || <Bell size={16} strokeWidth={2.2} />}
+                    </div>
+                  )}
                 </div>
+
                 <div className="notif-body">
-                  <p className="notif-text">{getNotificationText(notif)}</p>
+                  <p className="notif-text">{getNotificationContent(notif)}</p>
                   <span className="notif-time">{new Date(notif.created_at).toLocaleString()}</span>
                 </div>
                 {!notif.is_read && <div className="notif-dot" />}

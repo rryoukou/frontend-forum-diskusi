@@ -7,6 +7,11 @@ const userService = {
     return response.data;
   },
 
+  getAdminStats: async (): Promise<any> => {
+    const response = await api.get('/admin/stats');
+    return response.data;
+  },
+
   updateUserRoles: async (userId: string, roles: string[]): Promise<any> => {
     const response = await api.post(`/admin/users/${userId}/roles`, { roles });
     return response.data;

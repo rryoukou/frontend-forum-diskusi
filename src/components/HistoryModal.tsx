@@ -76,13 +76,56 @@ const HistoryModal: React.FC<HistoryModalProps> = ({ isOpen, onClose, history, t
                     </span>
                     <span className="history-item-date">
                       <Clock size={11} strokeWidth={2} />
-                      {new Date(item.created_at).toLocaleString()}
+                      {new Date(item.edited_at || item.created_at).toLocaleString()}
                     </span>
                   </div>
-                  {item.title && (
-                    <h4 className="history-item-title">{item.title}</h4>
+
+                  {item.editor && (
+                    <div className="history-item-editor">
+                      <img 
+                        src={item.editor.avatar_url || `https://ui-avatars.com/api/?name=${item.editor.username}&background=random`} 
+                        alt={item.editor.username} 
+                        className="history-editor-avatar" 
+                      />
+                      <span className="history-editor-name">Edited by <strong>{item.editor.username}</strong></span>
+                    </div>
                   )}
-                  <p className="history-item-body">{item.body}</p>
+
+                  {item.reason && (
+                    <div className="history-item-reason">
+                      <span className="reason-label">Reason:</span> {item.reason}
+                    </div>
+                  )}
+
+                  <div className="history-diff-container">
+                    {/* Title Diff */}
+                    {item.title_after && (
+                      <div className="history-diff-item">
+                        <div className="history-diff-section before">
+                          <div className="diff-label">Old Title</div>
+                          <div className="diff-content">{item.title_before}</div>
+                        </div>
+                        <div className="history-diff-section after">
+                          <div className="diff-label">New Title</div>
+                          <div className="diff-content">{item.title_after}</div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Body Diff */}
+                    {item.body_after && (
+                      <div className="history-diff-item">
+                        <div className="history-diff-section before">
+                          <div className="diff-label">{item.title_after ? 'Old Content' : 'Before'}</div>
+                          <div className="diff-content">{item.body_before || item.body}</div>
+                        </div>
+                        <div className="history-diff-section after">
+                          <div className="diff-label">{item.title_after ? 'New Content' : 'After'}</div>
+                          <div className="diff-content">{item.body_after}</div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
