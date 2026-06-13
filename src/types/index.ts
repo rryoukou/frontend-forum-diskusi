@@ -13,6 +13,7 @@ export interface User {
   reputation_points: number;
   level: number;
   is_banned: boolean;
+  ban_reason?: string;
   created_at: string;
   updated_at: string;
   roles?: Role[];

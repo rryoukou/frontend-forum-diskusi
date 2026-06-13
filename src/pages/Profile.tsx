@@ -14,6 +14,12 @@ import {
   Star, Target, CalendarDays, ThumbsUp, Eye, Medal, FileText,
 } from 'lucide-react';
 import './Profile.css';
+import ModerationModal, { type ModerationActionType } from '../components/ModerationModal';
+
+interface ModalState {
+  isOpen: boolean;
+  type: ModerationActionType;
+}
 
 const Profile: React.FC = () => {
   const { username }  = useParams<{ username: string }>();
@@ -21,6 +27,11 @@ const Profile: React.FC = () => {
   const [userPosts, setUserPosts] = useState<Post[]>([]);
   const [loading, setLoading]     = useState(true);
   const [isFollowing, setIsFollowing] = useState(false);
+  const [modal, setModal] = useState<ModalState>({
+    isOpen: false,
+    type: 'warn',
+  });
+
   const currentUser = authService.getCurrentUser();
   const dispatch = useAppDispatch();
 
@@ -47,9 +58,38 @@ const Profile: React.FC = () => {
     if (!profile) return;
     try { await userService.toggleFollow(profile.id); setIsFollowing(!isFollowing); const u = await userService.getProfile(username!); setProfile(u); } catch { /* */ }
   };
-  const handleWarnUser  = async () => { if (!profile) return; const r = window.prompt(`Warning reason for @${profile.username}:`); if (!r) return; try { await moderationService.warnUser(profile.id, r); alert(`@${profile.username} warned.`); } catch { alert('Failed'); } };
-  const handleBanUser   = async () => { if (!profile) return; const r = window.prompt(`BAN reason for @${profile.username}:`); if (!r) return; if (!window.confirm(`Ban @${profile.username}?`)) return; try { await moderationService.banUser(profile.id, r); fetchProfileData(); } catch { alert('Failed'); } };
-  const handleUnbanUser = async () => { if (!profile) return; const r = window.prompt(`Unban reason for @${profile.username}:`); if (!r) return; try { await moderationService.unbanUser(profile.id, r); fetchProfileData(); } catch { alert('Failed'); } };
+
+  const openModModal = (type: ModerationActionType) => {
+    setModal({
+      isOpen: true,
+      type,
+    });
+  };
+
+  const closeModModal = () => {
+    setModal(prev => ({ ...prev, isOpen: false }));
+  };
+
+  const handleModConfirm = async (reason: string) => {
+    if (!profile) return;
+    const { type } = modal;
+    
+    try {
+      if (type === 'warn') {
+        await moderationService.warnUser(profile.id, reason);
+      } else if (type === 'ban') {
+        await moderationService.banUser(profile.id, reason);
+        fetchProfileData();
+      } else if (type === 'unban') {
+        await moderationService.unbanUser(profile.id, reason);
+        fetchProfileData();
+      }
+      closeModModal();
+    } catch {
+      alert(`Failed to ${type} user`);
+      closeModModal();
+    }
+  };
 
   if (loading) return <Layout><div className="loading-spinner">Loading profile...</div></Layout>;
   if (!profile) return <Layout><div className="card">User not found.</div></Layout>;
@@ -77,8 +117,25 @@ const Profile: React.FC = () => {
               </div>
 
               {profile.is_banned && (
-                <div className="banned-banner">
-                  <Ban size={14} strokeWidth={2.5} /> This account is currently banned
+                <div className="banned-banner" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: 'var(--sp-1)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-2)' }}>
+                    <Ban size={14} strokeWidth={2.5} /> This account is currently banned
+                  </div>
+                  {profile.ban_reason && (
+                    <div style={{ 
+                      fontSize: '0.75rem', 
+                      opacity: 0.9, 
+                      padding: 'var(--sp-2)', 
+                      background: 'rgba(0,0,0,0.1)', 
+                      borderRadius: 'var(--radius-sm)',
+                      width: '100%',
+                      marginTop: 'var(--sp-1)',
+                      borderLeft: '2px solid rgba(255,255,255,0.3)'
+                    }}>
+                      <strong style={{ display: 'block', marginBottom: '2px', fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Reason:</strong>
+                      {profile.ban_reason}
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -100,14 +157,14 @@ const Profile: React.FC = () => {
 
               {currentUser && authService.isModerator() && currentUser.id !== profile.id && (
                 <div className="mod-actions">
-                  <button onClick={handleWarnUser}  className="mod-btn mod-btn-warn" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5 }}>
+                  <button onClick={() => openModModal('warn')}  className="mod-btn mod-btn-warn" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5 }}>
                     <AlertTriangle size={12} strokeWidth={2.5} /> Warn
                   </button>
                   {profile.is_banned
-                    ? <button onClick={handleUnbanUser} className="mod-btn mod-btn-unban" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5 }}>
+                    ? <button onClick={() => openModModal('unban')} className="mod-btn mod-btn-unban" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5 }}>
                         <ShieldCheck size={12} strokeWidth={2.5} /> Unban
                       </button>
-                    : <button onClick={handleBanUser}   className="mod-btn mod-btn-ban" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5 }}>
+                    : <button onClick={() => openModModal('ban')}   className="mod-btn mod-btn-ban" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5 }}>
                         <Ban size={12} strokeWidth={2.5} /> Ban
                       </button>
                   }
@@ -195,6 +252,14 @@ const Profile: React.FC = () => {
           )}
         </main>
       </div>
+
+      <ModerationModal
+        isOpen={modal.isOpen}
+        type={modal.type}
+        username={profile.username}
+        onClose={closeModModal}
+        onConfirm={handleModConfirm}
+      />
     </Layout>
   );
 };

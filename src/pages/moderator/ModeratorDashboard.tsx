@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import moderationService from '../../services/moderationService';
 import ModeratorDashboardView from './ModeratorDashboardView';
-
+import ModerationModal, { type ModerationActionType } from '../../components/ModerationModal';
 
 interface ReportTarget {
   user_id: string;
@@ -24,9 +24,22 @@ interface Report {
   };
 }
 
+interface ModalState {
+  isOpen: boolean;
+  type: ModerationActionType;
+  userId: string;
+  username: string;
+}
+
 const ModeratorDashboard = () => {
   const [reports, setReports] = useState<Report[]>([]);
   const [loading, setLoading] = useState(true);
+  const [modal, setModal] = useState<ModalState>({
+    isOpen: false,
+    type: 'warn',
+    userId: '',
+    username: '',
+  });
 
   const fetchReports = useCallback(async () => {
     try {
@@ -40,12 +53,11 @@ const ModeratorDashboard = () => {
   }, []);
 
   useEffect(() => {
-  requestAnimationFrame(() => {
-    fetchReports();
-  });
-
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-}, []);
+    requestAnimationFrame(() => {
+      fetchReports();
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleResolve = async (
     id: string,
@@ -55,58 +67,42 @@ const ModeratorDashboard = () => {
       await moderationService.resolveReport(id, status);
       fetchReports();
     } catch {
-      alert('Failed');
+      alert('Failed to resolve report');
     }
   };
 
-  const handleWarnUser = async (
-    userId: string,
-    username: string
-  ) => {
-    const reason = window.prompt(`Warning reason for @${username}:`);
-
-    if (!reason) return;
-
-    try {
-      await moderationService.warnUser(userId, reason);
-      alert(`@${username} warned.`);
-    } catch {
-      alert('Failed');
-    }
+  const openModModal = (type: ModerationActionType, userId: string, username: string) => {
+    setModal({
+      isOpen: true,
+      type,
+      userId,
+      username,
+    });
   };
 
-  const handleBanUser = async (
-    userId: string,
-    username: string
-  ) => {
-    const reason = window.prompt(`BAN reason for @${username}:`);
-
-    if (!reason) return;
-
-    if (!window.confirm(`Ban @${username}?`)) return;
-
-    try {
-      await moderationService.banUser(userId, reason);
-      alert(`@${username} banned.`);
-    } catch {
-      alert('Failed');
-    }
+  const closeModModal = () => {
+    setModal(prev => ({ ...prev, isOpen: false }));
   };
 
-  const handleUnbanUser = async (
-    userId: string,
-    username: string
-  ) => {
-    const reason = window.prompt(`Unban reason for @${username}:`);
-
-    if (!reason) return;
-
+  const handleModConfirm = async (reason: string) => {
+    const { type, userId, username } = modal;
+    
     try {
-      await moderationService.unbanUser(userId, reason);
-      alert(`@${username} unbanned.`);
+      if (type === 'warn') {
+        await moderationService.warnUser(userId, reason);
+        // We don't alert here as the modal handles the state, 
+        // but we should probably show a success toast in a real app.
+      } else if (type === 'ban') {
+        await moderationService.banUser(userId, reason);
+      } else if (type === 'unban') {
+        await moderationService.unbanUser(userId, reason);
+      }
+      
       fetchReports();
+      closeModModal();
     } catch {
-      alert('Failed');
+      alert(`Failed to ${type} user`);
+      closeModModal();
     }
   };
 
@@ -119,16 +115,26 @@ const ModeratorDashboard = () => {
   ).length;
 
   return (
-    <ModeratorDashboardView
-      reports={reports}
-      loading={loading}
-      pendingCount={pendingCount}
-      resolvedCount={resolvedCount}
-      handleResolve={handleResolve}
-      handleWarnUser={handleWarnUser}
-      handleBanUser={handleBanUser}
-      handleUnbanUser={handleUnbanUser}
-    />
+    <>
+      <ModeratorDashboardView
+        reports={reports}
+        loading={loading}
+        pendingCount={pendingCount}
+        resolvedCount={resolvedCount}
+        handleResolve={handleResolve}
+        handleWarnUser={(userId, username) => openModModal('warn', userId, username)}
+        handleBanUser={(userId, username) => openModModal('ban', userId, username)}
+        handleUnbanUser={(userId, username) => openModModal('unban', userId, username)}
+      />
+
+      <ModerationModal
+        isOpen={modal.isOpen}
+        type={modal.type}
+        username={modal.username}
+        onClose={closeModModal}
+        onConfirm={handleModConfirm}
+      />
+    </>
   );
 };
 

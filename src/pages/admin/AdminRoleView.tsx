@@ -12,6 +12,7 @@ import {
   AlertTriangle, 
   Clock 
 } from 'lucide-react';
+import ModerationModal, { type ModerationActionType } from '../../components/ModerationModal';
 
 // ════════════ LOADING SKELETON COMPONENT ════════════
 const TableSkeleton: React.FC = () => {
@@ -69,6 +70,13 @@ const TableSkeleton: React.FC = () => {
   );
 };
 
+interface ModalState {
+  isOpen: boolean;
+  type: ModerationActionType;
+  userId: string;
+  username: string;
+}
+
 const UserManagement: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
@@ -77,6 +85,12 @@ const UserManagement: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState('All Status');
   const [showRoleChangeAnimation, setShowRoleChangeAnimation] = useState<string | null>(null);
   const [roleChangeDirection, setRoleChangeDirection] = useState<{userId: string, from: string, to: string} | null>(null);
+  const [modal, setModal] = useState<ModalState>({
+    isOpen: false,
+    type: 'warn',
+    userId: '',
+    username: '',
+  });
 
   const refreshUsersData = async () => {
     try {
@@ -117,38 +131,39 @@ const UserManagement: React.FC = () => {
     }
   };
 
-  const handleWarnUser = async (userId: string) => {
-    const reason = window.prompt('Enter warning reason:');
-    if (!reason) return;
-    try {
-      await moderationService.warnUser(userId, reason);
-      alert('Warning sent successfully');
-    } catch (error) {
-      alert('Failed to send warning');
-    }
+  const openModModal = (type: ModerationActionType, userId: string, username: string) => {
+    setModal({
+      isOpen: true,
+      type,
+      userId,
+      username,
+    });
   };
 
-  const handleBanUser = async (userId: string) => {
-    const reason = window.prompt('Enter reason for banning this user:');
-    if (!reason) return;
-    try {
-      await moderationService.banUser(userId, reason);
-      alert('User banned successfully');
-      await refreshUsersData();
-    } catch (error) {
-      console.error('Ban failed');
-    }
+  const closeModModal = () => {
+    setModal(prev => ({ ...prev, isOpen: false }));
   };
 
-  const handleUnbanUser = async (userId: string) => {
-    const reason = window.prompt('Enter reason for unbanning this user:');
-    if (!reason) return;
+  const handleModConfirm = async (reason: string) => {
+    const { type, userId } = modal;
+    
     try {
-      await moderationService.unbanUser(userId, reason);
-      alert('User unbanned successfully');
-      await refreshUsersData();
+      if (type === 'warn') {
+        await moderationService.warnUser(userId, reason);
+        alert('Warning sent successfully');
+      } else if (type === 'ban') {
+        await moderationService.banUser(userId, reason);
+        alert('User banned successfully');
+        await refreshUsersData();
+      } else if (type === 'unban') {
+        await moderationService.unbanUser(userId, reason);
+        alert('User unbanned successfully');
+        await refreshUsersData();
+      }
+      closeModModal();
     } catch (error) {
-      console.error('Unban failed');
+      alert(`Failed to ${type} user`);
+      closeModModal();
     }
   };
 
@@ -370,7 +385,7 @@ const UserManagement: React.FC = () => {
                               <>
                                 {user.is_banned ? (
                                   <button 
-                                    onClick={() => handleUnbanUser(user.id)} 
+                                    onClick={() => openModModal('unban', user.id, user.username || '')} 
                                     style={{
                                       padding: '5px 10px', borderRadius: '6px', border: 'none', cursor: 'pointer',
                                       background: 'rgba(46, 204, 113, 0.15)', color: '#2ecc71',
@@ -381,7 +396,7 @@ const UserManagement: React.FC = () => {
                                   </button>
                                 ) : (
                                   <button 
-                                    onClick={() => handleBanUser(user.id)} 
+                                    onClick={() => openModModal('ban', user.id, user.username || '')} 
                                     style={{
                                       padding: '5px 10px', borderRadius: '6px', border: 'none', cursor: 'pointer',
                                       background: 'rgba(231, 76, 60, 0.15)', color: '#e74c3c',
@@ -392,7 +407,7 @@ const UserManagement: React.FC = () => {
                                   </button>
                                 )}
                                 <button 
-                                  onClick={() => handleWarnUser(user.id)} 
+                                  onClick={() => openModModal('warn', user.id, user.username || '')} 
                                   style={{
                                     padding: '5px 10px', borderRadius: '6px', border: 'none', cursor: 'pointer',
                                     background: 'rgba(241, 196, 15, 0.15)', color: '#f1c40f',
@@ -444,6 +459,14 @@ const UserManagement: React.FC = () => {
           }
         `}</style>
       </div>
+
+      <ModerationModal
+        isOpen={modal.isOpen}
+        type={modal.type}
+        username={modal.username}
+        onClose={closeModModal}
+        onConfirm={handleModConfirm}
+      />
     </>
   );
 };
