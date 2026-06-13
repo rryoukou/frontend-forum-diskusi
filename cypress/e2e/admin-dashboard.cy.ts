@@ -1,31 +1,28 @@
-describe('Admin Dashboard Flow', () => {
-  // Kita buat variabel timeout 1 menit
-  const LONG_TIMEOUT = { timeout: 60000 };
-
+describe('E2E - Admin Login and Navigation', () => {
   beforeEach(() => {
-    cy.session('admin-session', () => {
-      cy.visit('/login');
-      cy.get('input[type="email"]').clear().type('admin@forum.com');
-      cy.get('input[type="password"]').clear().type('password');
-      cy.get('button').contains(/sign in/i).click();
-      
-      // Tunggu login sukses
-      cy.contains(/sign in/i, LONG_TIMEOUT).should('not.exist');
-    });
-
-    // 2. Kunjungi dashboard dengan timeout 1 menit
-    cy.visit('/dashboard', LONG_TIMEOUT);
+    // 1. Kunjungi halaman login
+    cy.visit('/login'); // Sesuaikan dengan path yang benar
   });
 
-  it('should wait for dashboard and table', () => {
-    // Memastikan judul dashboard muncul dalam 1 menit
-    cy.contains(/admin dashboard/i, LONG_TIMEOUT).should('be.visible');
+  it('seharusnya bisa login sebagai admin dan masuk ke dashboard', () => {
+    // 2. Isi form login
+    cy.get('input[type="email"]').type('admin@forum.com');
+    cy.get('input[type="password"]').type('password'); // Jangan lupa sesuaikan
     
-    // Scroll ke tabel
-    cy.contains(/registered management accounts/i, LONG_TIMEOUT)
-      .scrollIntoView();
-      
-    // Memastikan tabel muncul dalam 1 menit
-    cy.get('table', LONG_TIMEOUT).should('be.visible');
+    // 3. Klik tombol Sign In
+    cy.contains('Sign In').click();
+
+    // 4. Verifikasi masuk ke home page (pastikan ada elemen unik setelah login)
+    cy.url().should('include', '/'); 
+    cy.contains('Recent Discussions').should('be.visible');
+
+    // 5. Navigasi ke Admin Dashboard (klik menu sidebar)
+    // Sesuaikan selector dengan elemen sidebar di screenshot
+    cy.contains('Dashboard').click();
+
+    // 6. Verifikasi berada di Dashboard Admin
+    cy.url().should('include', '/admin');
+    cy.contains('Admin Dashboard').should('be.visible');
+    cy.contains('Registered Management Accounts').should('be.visible');
   });
 });

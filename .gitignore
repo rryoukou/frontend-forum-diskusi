@@ -28,3 +28,5 @@ cypress/videos
 cypress/screenshots
 cypress/downloads
 cypress.env.json
+"cypress/" 
+"cypress.config.ts" 
