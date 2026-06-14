@@ -2,12 +2,13 @@ import React, { useEffect, useState } from 'react';
 import Layout from '../layouts/Layout';
 import bookmarkService from '../services/bookmarkService';
 import { Link } from 'react-router-dom';
-import { ThumbsUp, MessageCircle, Bookmark } from 'lucide-react';
+import { ThumbsUp, MessageCircle, Bookmark as BookmarkIcon } from 'lucide-react';
+import type { Bookmark } from '../types';
 import './Home.css';
 import '../App.css';
 
 const Bookmarks: React.FC = () => {
-  const [bookmarks, setBookmarks] = useState<any[]>([]);
+  const [bookmarks, setBookmarks] = useState<Bookmark[]>([]);
   const [loading, setLoading]     = useState(true);
 
   useEffect(() => {
@@ -32,7 +33,7 @@ const Bookmarks: React.FC = () => {
         ) : bookmarks.length === 0 ? (
           <div className="empty-state">
             <span className="empty-state-icon" style={{ display: 'flex', justifyContent: 'center' }}>
-              <Bookmark size={48} strokeWidth={1.2} style={{ opacity: .35 }} />
+              <BookmarkIcon size={48} strokeWidth={1.2} style={{ opacity: 0.35 }} />
             </span>
             <h3>Nothing saved yet</h3>
             <p>Bookmark interesting posts to find them here later.</p>
@@ -65,7 +66,7 @@ const Bookmarks: React.FC = () => {
                         {post.user?.username}
                       </Link>
                     </span>
-                    <span><ThumbsUp    size={12} strokeWidth={2.5} /> {post.vote_score ?? 0}</span>
+                    <span><ThumbsUp size={12} strokeWidth={2.5} /> {post.vote_score ?? 0}</span>
                     <span><MessageCircle size={12} strokeWidth={2.5} /> {post.comments_count ?? 0}</span>
                   </div>
                 </div>

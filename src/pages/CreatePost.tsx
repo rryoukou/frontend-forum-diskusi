@@ -43,7 +43,10 @@ const CreatePost: React.FC = () => {
     try {
       await postService.createPost({ title, body, category_id: categoryId, tags: selectedTags });
       navigate('/');
-    } catch (err: unknown) { setError((err as any).response?.data?.message || 'Failed to create post'); }
+    } catch (err: unknown) {
+      const apiErr = err as { response?: { data?: { message?: string } } };
+      setError(apiErr.response?.data?.message || 'Failed to create post');
+    }
     finally { setLoading(false); }
   };
 

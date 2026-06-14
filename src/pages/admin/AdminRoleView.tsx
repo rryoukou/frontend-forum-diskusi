@@ -1,5 +1,6 @@
 import React from 'react';
 import type { Role } from './AdminRoles';
+import type { RoleFormValues } from '../../types';
 
 interface AdminRoleViewProps {
   roles: Role[];
@@ -11,7 +12,7 @@ interface AdminRoleViewProps {
   error: string | null;
   handleOpenModal: (role?: Role | null) => void;
   handleCloseModal: () => void;
-  handleFormSubmit: (values: any) => Promise<void>;
+  handleFormSubmit: (values: RoleFormValues) => Promise<void>;
   handleDelete: (id: string) => Promise<void>;
   setSelectedRole: (role: Role | null) => void;
 }

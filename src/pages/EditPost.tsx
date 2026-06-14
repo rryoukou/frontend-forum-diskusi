@@ -29,7 +29,7 @@ const EditPost: React.FC = () => {
         setCategories(c); setTags(t);
         setTitle(post.title); setBody(post.body);
         setCategoryId(post.category_id.toString());
-        setSelectedTags(post.tags?.map((tg: any) => tg.name) || []);
+        setSelectedTags(post.tags?.map((tg) => tg.name) || []);
       } catch { console.error('Failed to fetch data'); setError('Failed to load post data.'); }
       finally { setFetching(false); }
     };
@@ -39,7 +39,10 @@ const EditPost: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault(); setLoading(true); setError('');
     try { await postService.updatePost(id!, { title, body, category_id: categoryId, tags: selectedTags }); navigate(`/posts/${id}`); }
-    catch (err: any) { setError(err.response?.data?.message || 'Failed to update post'); }
+    catch (err: unknown) { 
+      const error = err as { response?: { data?: { message?: string } } };
+      setError(error.response?.data?.message || 'Failed to update post'); 
+    }
     finally { setLoading(false); }
   };
 

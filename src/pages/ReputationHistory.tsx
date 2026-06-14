@@ -32,7 +32,7 @@ const ReputationHistory: React.FC = () => {
         await dispatch(fetchCurrentUser());
 
         const data = await badgeService.getReputationHistory();
-        setLogs(Array.isArray(data) ? data : (data as any).data || []);
+        setLogs(Array.isArray(data) ? data : []);
       } catch {
         console.error('Failed to fetch reputation history');
       } finally {

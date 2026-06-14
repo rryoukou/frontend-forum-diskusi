@@ -1,15 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { 
-  Users, Search, Shield, UserCheck, UserX, AlertCircle, 
-  Trash2, Bell, Filter, MoreHorizontal, CheckCircle2,
-  TrendingUp, Award, ShieldAlert
+  Users, Search, Shield, UserCheck, UserX, 
+  Bell, Filter, CheckCircle2, ShieldAlert
 } from 'lucide-react';
 import AdminLayout from '../../layouts/AdminLayout';
 import userService from '../../services/userService';
 import moderationService from '../../services/moderationService';
 import type { User } from '../../types/index';
 import ModerationModal, { type ModerationActionType } from '../../components/ModerationModal';
-
+  
 interface ModalState {
   isOpen: boolean;
   type: ModerationActionType;

@@ -1,18 +1,30 @@
 import api from './api';
-import type { User } from '../types/index';
+import type { User, UpdateProfileData } from '../types/index';
+
+interface AdminStats {
+  totalUsers: number;
+  adminUsers: number;
+  moderatorUsers: number;
+  reportCount: number;
+}
+
+interface AdminUsersResponse {
+  data: User[];
+  total: number;
+}
 
 const userService = {
-  getAdminUsers: async (): Promise<any> => {
+  getAdminUsers: async (): Promise<AdminUsersResponse> => {
     const response = await api.get('/admin/users');
     return response.data;
   },
 
-  getAdminStats: async (): Promise<any> => {
+  getAdminStats: async (): Promise<AdminStats> => {
     const response = await api.get('/admin/stats');
     return response.data;
   },
 
-  updateUserRoles: async (userId: string, roles: string[]): Promise<any> => {
+  updateUserRoles: async (userId: string, roles: string[]): Promise<User> => {
     const response = await api.post(`/admin/users/${userId}/roles`, { roles });
     return response.data;
   },
@@ -22,7 +34,7 @@ const userService = {
     return response.data;
   },
 
-  updateProfile: async (profileData: any): Promise<any> => {
+  updateProfile: async (profileData: UpdateProfileData): Promise<User> => {
     // If profileData contains a file, use FormData
     if (profileData.avatar instanceof File) {
       const formData = new FormData();
@@ -67,7 +79,7 @@ const userService = {
     return response.data.data || response.data;
   },
 
-  toggleFollow: async (userId: string): Promise<any> => {
+  toggleFollow: async (userId: string): Promise<{ message: string }> => {
     const response = await api.post('/follow', { user_id: userId });
     return response.data;
   }

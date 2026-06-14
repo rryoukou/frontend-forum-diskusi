@@ -50,8 +50,31 @@ const Profile: React.FC = () => {
     finally { setLoading(false); }
   };
 
+  useEffect(() => {
+    if (!username) return;
+    let cancelled = false;
+    const load = async () => {
+      try {
+        const pd = await userService.getProfile(username);
+        const posts = await postService.getAllPosts({ username });
+        if (!cancelled) {
+          setProfile(pd);
+          setIsFollowing(pd.is_following || false);
+          if (currentUser?.username === pd.username) {
+            dispatch(setUser(pd));
+          }
+          setUserPosts(posts);
+        }
+      } catch {
+        console.error('Failed to fetch profile');
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+    load();
+    return () => { cancelled = true; };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => { fetchProfileData(); }, [username]);
+  }, [username]);
 
   const handleFollowToggle = async () => {
     if (!currentUser) return alert('Please login to follow users');

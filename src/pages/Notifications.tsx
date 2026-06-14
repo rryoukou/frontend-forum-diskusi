@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import type { Notification } from '../types';
 import Layout from '../layouts/Layout';
 import notificationService from '../services/notificationService';
 import { resolveAvatar } from '../utils/avatar';
@@ -18,31 +19,38 @@ const NOTIF_ICONS: Record<string, React.ReactNode> = {
 };
 
 const NotificationPage: React.FC = () => {
-  const [notifications, setNotifications] = useState<any[]>([]);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading]             = useState(true);
 
-  useEffect(() => { fetchNotifications(); }, []);
+  useEffect(() => {
+    const loadNotifications = async () => {
+      try {
+        const d = await notificationService.getNotifications();
+        setNotifications(d.data);
+      } catch {
+        console.error('Failed to fetch notifications');
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const fetchNotifications = async () => {
-    try { const d = await notificationService.getNotifications(); setNotifications(d.data); }
-    catch { console.error('Failed to fetch notifications'); }
-    finally { setLoading(false); }
-  };
+    loadNotifications().catch(console.error);
+  }, []);
 
   const handleMarkAsRead = async (id: string) => {
-    try { await notificationService.markAsRead(id); setNotifications(prev => prev.map(n => n.id === id ? { ...n, is_read: true } : n)); }
+    try { await notificationService.markAsRead(id); setNotifications(prev => prev.map(n => n.id === id ? { ...n, read_at: new Date().toISOString() } : n)); }
     catch { console.error('Failed to mark as read'); }
   };
 
   const handleMarkAllRead = async () => {
-    try { await notificationService.markAllAsRead(); setNotifications(prev => prev.map(n => ({ ...n, is_read: true }))); }
+    try { await notificationService.markAllAsRead(); setNotifications(prev => prev.map(n => ({ ...n, read_at: new Date().toISOString() }))); }
     catch { console.error('Failed to mark all as read'); }
   };
 
-  const getNotificationContent = (notif: any) => {
+  const getNotificationContent = (notif: Notification) => {
     const actorName = notif.actor?.username || 'Someone';
     
-    if (notif.message) return <span>{notif.message}</span>;
+    if (notif.data) return <span>{notif.data}</span>;
 
     const highlight = <strong style={{ color: 'var(--text-1)' }}>{actorName}</strong>;
 
@@ -59,7 +67,7 @@ const NotificationPage: React.FC = () => {
     }
   };
 
-  const unreadCount = notifications.filter(n => !n.is_read).length;
+  const unreadCount = notifications.filter(n => !n.read_at).length;
 
   return (
     <Layout>
@@ -98,8 +106,8 @@ const NotificationPage: React.FC = () => {
             {notifications.map(notif => (
               <div
                 key={notif.id}
-                onClick={() => !notif.is_read && handleMarkAsRead(notif.id)}
-                className={`notif-card${notif.is_read ? '' : ' unread'}`}
+                onClick={() => !notif.read_at && handleMarkAsRead(notif.id)}
+                className={`notif-card${notif.read_at ? '' : ' unread'}`}
               >
                 <div className="notif-actor-section">
                   {notif.actor ? (
@@ -124,7 +132,7 @@ const NotificationPage: React.FC = () => {
                   <p className="notif-text">{getNotificationContent(notif)}</p>
                   <span className="notif-time">{new Date(notif.created_at).toLocaleString()}</span>
                 </div>
-                {!notif.is_read && <div className="notif-dot" />}
+                {!notif.read_at && <div className="notif-dot" />}
               </div>
             ))}
           </div>

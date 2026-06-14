@@ -1,7 +1,15 @@
 import api from './api';
+import type { Notification } from '../types';
+
+interface NotificationResponse {
+  data: Notification[];
+  current_page?: number;
+  last_page?: number;
+  total?: number;
+}
 
 const notificationService = {
-  getNotifications: async (page: number = 1): Promise<any> => {
+  getNotifications: async (page: number = 1): Promise<NotificationResponse> => {
     const response = await api.get('/notifications', { params: { page } });
     return response.data;
   },
@@ -11,19 +19,16 @@ const notificationService = {
     return response.data.unread_count;
   },
 
-  markAsRead: async (id: string): Promise<any> => {
-    const response = await api.post(`/notifications/${id}/read`);
-    return response.data;
+  markAsRead: async (id: string): Promise<void> => {
+    await api.post(`/notifications/${id}/read`);
   },
 
-  markAllAsRead: async (): Promise<any> => {
-    const response = await api.post('/notifications/read-all');
-    return response.data;
+  markAllAsRead: async (): Promise<void> => {
+    await api.post('/notifications/read-all');
   },
 
-  deleteNotification: async (id: string): Promise<any> => {
-    const response = await api.delete(`/notifications/${id}`);
-    return response.data;
+  deleteNotification: async (id: string): Promise<void> => {
+    await api.delete(`/notifications/${id}`);
   }
 };
 

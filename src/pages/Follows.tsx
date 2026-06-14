@@ -22,27 +22,30 @@ const Follows: React.FC = () => {
   const [search, setSearch]           = useState('');
   const [loading, setLoading]         = useState(true);
 
-  const fetchData = async () => {
+  useEffect(() => {
     if (!username) return;
-    setLoading(true);
-    try {
-      const [flrs, flng] = await Promise.all([
-        userService.getFollowers(username),
-        userService.getFollowing(username),
-      ]);
-      setFollowers(Array.isArray(flrs) ? flrs : []);
-      setFollowing(Array.isArray(flng) ? flng : []);
 
-      // Build set of who current user is following (for follow button state)
-      if (currentUser) {
-        const myFollowing = await userService.getFollowing(currentUser.username);
-        setFollowingIds(new Set(Array.isArray(myFollowing) ? myFollowing.map((u: User) => u.id) : []));
-      }
-    } catch { console.error('Failed to fetch follows'); }
-    finally { setLoading(false); }
-  };
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        const [flrs, flng] = await Promise.all([
+          userService.getFollowers(username),
+          userService.getFollowing(username),
+        ]);
+        setFollowers(Array.isArray(flrs) ? flrs : []);
+        setFollowing(Array.isArray(flng) ? flng : []);
 
-  useEffect(() => { fetchData(); }, [username]);
+        // Build set of who current user is following (for follow button state)
+        if (currentUser) {
+          const myFollowing = await userService.getFollowing(currentUser.username);
+          setFollowingIds(new Set(Array.isArray(myFollowing) ? myFollowing.map((u: User) => u.id) : []));
+        }
+      } catch { console.error('Failed to fetch follows'); }
+      finally { setLoading(false); }
+    };
+
+    fetchData();
+  }, [username]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleFollowToggle = async (targetUser: User) => {
     if (!currentUser) { navigate('/login'); return; }

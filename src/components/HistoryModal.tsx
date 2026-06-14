@@ -2,10 +2,12 @@ import React, { useEffect, useRef } from 'react';
 import { Clock, X, History } from 'lucide-react';
 import './HistoryModal.css';
 
+import type { EditHistory } from '../types';
+
 interface HistoryModalProps {
   isOpen: boolean;
   onClose: () => void;
-  history: any[];
+  history: EditHistory[];
   title: string;
 }
 

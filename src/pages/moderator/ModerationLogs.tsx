@@ -24,7 +24,7 @@ const ModerationLogs = () => {
     const fetchLogs = async () => {
       try {
         const data = await moderationService.getLogs();
-        setLogs(data.data || data);
+        setLogs(data);
       } catch {
         console.error('Failed to fetch moderation logs');
       } finally {

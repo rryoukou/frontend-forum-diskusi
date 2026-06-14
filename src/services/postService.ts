@@ -1,5 +1,5 @@
 import api from './api';
-import type { Post } from '../types/index';
+import type { Post, CreatePostData, UpdatePostData, EditHistory } from '../types/index';
 
 const postService = {
   getAllPosts: async (params?: Record<string, string | number | undefined>): Promise<Post[]> => {
@@ -26,12 +26,12 @@ const postService = {
     return response.data;
   },
 
-  createPost: async (postData: any): Promise<Post> => {
+  createPost: async (postData: CreatePostData): Promise<Post> => {
     const response = await api.post('/posts', postData);
     return response.data;
   },
 
-  updatePost: async (id: string, postData: any): Promise<Post> => {
+  updatePost: async (id: string, postData: UpdatePostData): Promise<Post> => {
     const response = await api.put(`/posts/${id}`, postData);
     return response.data;
   },
@@ -40,7 +40,7 @@ const postService = {
     await api.delete(`/posts/${id}`, { params: { reason } });
   },
 
-  getPostHistory: async (id: string): Promise<any[]> => {
+  getPostHistory: async (id: string): Promise<EditHistory[]> => {
     const response = await api.get(`/posts/${id}/history`);
     return response.data;
   }

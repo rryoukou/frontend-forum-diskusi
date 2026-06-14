@@ -1,5 +1,5 @@
 import api from './api';
-import type { Comment } from '../types/index';
+import type { Comment, CreateCommentData, UpdateCommentData, EditHistory } from '../types/index';
 
 const commentService = {
   getCommentsByPostId: async (postId: string): Promise<Comment[]> => {
@@ -7,17 +7,17 @@ const commentService = {
     return response.data.data || response.data; // Handle paginated response
   },
 
-  createComment: async (commentData: any): Promise<Comment> => {
+  createComment: async (commentData: CreateCommentData): Promise<Comment> => {
     const response = await api.post('/comments', commentData);
     return response.data.data || response.data; // Handle wrapped response
   },
 
-  updateComment: async (id: string, commentData: any): Promise<Comment> => {
+  updateComment: async (id: string, commentData: UpdateCommentData): Promise<Comment> => {
     const response = await api.put(`/comments/${id}`, commentData);
     return response.data;
   },
 
-  acceptComment: async (id: string): Promise<any> => {
+  acceptComment: async (id: string): Promise<{ message: string }> => {
     const response = await api.post(`/comments/${id}/accept`);
     return response.data;
   },
@@ -26,7 +26,7 @@ const commentService = {
     await api.delete(`/comments/${id}`, { params: { reason } });
   },
 
-  getCommentHistory: async (id: string): Promise<any[]> => {
+  getCommentHistory: async (id: string): Promise<EditHistory[]> => {
     const response = await api.get(`/comments/${id}/history`);
     return response.data;
   }

@@ -19,9 +19,13 @@ import { resolveAvatar } from '../utils/avatar';
 import { useAppDispatch } from '../store/hooks';
 import { fetchCurrentUser } from '../store/authSlice';
 import './PostDetail.css';
+import type { User } from '../types';
 
 interface CommentItemProps {
-  comment: Comment; user: any; isAuthor: boolean; isModerator: boolean;
+  comment: Comment; 
+  user: User | null; 
+  isAuthor: boolean; 
+  isModerator: boolean;
   onVote: (id: string, type: 'upvote' | 'downvote') => void;
   onLike: (id: string) => void;
   onReport: (id: string, type: 'post' | 'comment') => void;
@@ -151,7 +155,7 @@ const PostDetail: React.FC = () => {
   const [replyingTo, setReplyingTo]             = useState<Comment | null>(null);
   const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
   const [editCommentBody, setEditCommentBody]   = useState('');
-  const [history, setHistory]                   = useState<any[]>([]);
+  const [history, setHistory]                   = useState([]);
   const [historyTitle, setHistoryTitle]         = useState('');
   const [isHistoryOpen, setIsHistoryOpen]       = useState(false);
   const [reportTarget, setReportTarget]         = useState<{ id: string; type: 'post' | 'comment' } | null>(null);
@@ -167,11 +171,30 @@ const PostDetail: React.FC = () => {
       const pd = await postService.getPostById(id);
       setPost(pd);
       const cd = await commentService.getCommentsByPostId(id);
-      setComments(Array.isArray(cd) ? cd : (cd as any).data || []);
+      setComments(Array.isArray(cd) ? cd : []);
     } catch (err) { console.error(err); }
     finally { setLoading(false); }
   };
-  useEffect(() => { fetchPost(); }, [id]);
+  useEffect(() => {
+    if (!id) return;
+    let cancelled = false;
+    const load = async () => {
+      try {
+        const pd = await postService.getPostById(id);
+        const cd = await commentService.getCommentsByPostId(id);
+        if (!cancelled) {
+          setPost(pd);
+          setComments(Array.isArray(cd) ? cd : []);
+        }
+      } catch (err) {
+        console.error(err);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+    load();
+    return () => { cancelled = true; };
+  }, [id]);
 
   const handlePostDelete = () => {
     if (!id || !post) return;

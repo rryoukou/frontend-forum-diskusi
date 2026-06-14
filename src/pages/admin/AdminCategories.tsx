@@ -5,7 +5,7 @@ import AdminCategoryView from './AdminCategoryView';
 // Import Axios instance atau service kamu yang menggunakan Axios
 import categoryService from '../../services/categoryService';
 
-// ─── Interface untuk Tipe Data Form (Pengganti 'any' di baris 94) ───
+// ─── Interface untuk Tipe Data Form 
 export interface CategoryFormValues {
   name: string;
   slug: string;
@@ -121,9 +121,10 @@ function useAdminCategories() {
 
       await fetchCategories();
       handleCloseModal();
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { message?: string } } };
       // Tangkap error response standar dari Axios interceptor / objek AxiosError
-      const message = err.response?.data?.message || 'Failed to save category';
+      const message = error.response?.data?.message || 'Failed to save category';
       setError(message);
     } finally {
       setSubmitting(false);
@@ -140,8 +141,9 @@ function useAdminCategories() {
       if (selectedCategory?.id === id) {
         setSelectedCategory(categories.find(c => c.id !== id) || null);
       }
-    } catch (err: any) {
-      const message = err.response?.data?.message || 'Failed to delete category';
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { message?: string } } };
+      const message = error.response?.data?.message || 'Failed to delete category';
       alert(message);
     }
   };

@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import AdminLayout from '../../layouts/AdminLayout';
 import AdminRoleView from './AdminRoleView';
+import type { RoleFormValues } from '../../types';
 
 // Definisikan Type Interface Role lokal agar bisa dieksport ke View
 export interface Role {
@@ -21,10 +22,9 @@ function useAdminRoles() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchRoles = useCallback(async () => {
+  const refreshRoles = useCallback(async () => {
     setLoading(true);
     try {
-      // Data dummy fallback agar visual langsung terlihat aman
       const dummyRoles: Role[] = [
         { id: '1', name: 'Super Administrator', slug: 'super-admin', description: 'Full system access override control panels and data auditing.', permissions_count: 32, created_at: '2026-01-15' },
         { id: '2', name: 'Content Moderator', slug: 'moderator', description: 'Can review, delete, and manage flagged discussions or categories.', permissions_count: 14, created_at: '2026-02-10' },
@@ -34,14 +34,42 @@ function useAdminRoles() {
       setSelectedRole(prev => prev ?? dummyRoles[0]);
     } catch (err) {
       console.error("Failed fetching roles", err);
-    } finally { // 🛠️ PERBAIKAN: Menggunakan 'finally' (double l)
+    } finally {
       setLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    fetchRoles();
-  }, [fetchRoles]);
+    let isMounted = true;
+    
+    const loadRoles = async () => {
+      setLoading(true);
+      try {
+        const dummyRoles: Role[] = [
+          { id: '1', name: 'Super Administrator', slug: 'super-admin', description: 'Full system access override control panels and data auditing.', permissions_count: 32, created_at: '2026-01-15' },
+          { id: '2', name: 'Content Moderator', slug: 'moderator', description: 'Can review, delete, and manage flagged discussions or categories.', permissions_count: 14, created_at: '2026-02-10' },
+          { id: '3', name: 'Standard User', slug: 'user', description: 'Default client account role with capabilities to create thread topics.', permissions_count: 5, created_at: '2026-02-20' },
+        ];
+        
+        if (isMounted) {
+          setRoles(dummyRoles);
+          setSelectedRole(prev => prev ?? dummyRoles[0]);
+        }
+      } catch (err) {
+        console.error("Failed fetching roles", err);
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    loadRoles();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const handleOpenModal = (role: Role | null = null) => {
     setEditingRole(role);
@@ -54,7 +82,7 @@ function useAdminRoles() {
     setEditingRole(null);
   };
 
-  const handleFormSubmit = async (values: any) => {
+  const handleFormSubmit = async (values: RoleFormValues) => {
     setSubmitting(true);
     setError(null);
     try {
@@ -63,10 +91,11 @@ function useAdminRoles() {
       } else {
         console.log('Creating new role:', values);
       }
-      await fetchRoles();
+      await refreshRoles();
       handleCloseModal();
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to sync role data schemas');
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { message?: string } } };
+      setError(error.response?.data?.message || 'Failed to sync role data schemas');
     } finally { // 🛠️ PERBAIKAN: Menggunakan 'finally' (double l)
       setSubmitting(false);
     }
@@ -76,18 +105,24 @@ function useAdminRoles() {
     if (!window.confirm('Are you absolutely sure you want to completely drop this system role?')) return;
     try {
       console.log('Deleted role ID:', id);
-      await fetchRoles();
+      await refreshRoles();
       if (selectedRole?.id === id) {
         setSelectedRole(roles.find(r => r.id !== id) || null);
       }
-    } catch (err: any) {
-      alert(err.response?.data?.message || 'Failed operation on system role extraction');
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { message?: string } } };
+      alert(error.response?.data?.message || 'Failed operation on system role extraction');
     }
   };
 
+  const handleSetSelectedRole = useCallback((role: Role | null) => {
+    setSelectedRole(role);
+  }, []);
+
   return {
     roles, loading, isModalOpen, editingRole, selectedRole, submitting, error,
-    handleOpenModal, handleCloseModal, handleFormSubmit, handleDelete, setSelectedRole
+    handleOpenModal, handleCloseModal, handleFormSubmit, handleDelete, 
+    setSelectedRole: handleSetSelectedRole
   };
 }
 

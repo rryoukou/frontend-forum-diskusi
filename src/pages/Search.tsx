@@ -46,7 +46,7 @@ const Search: React.FC = () => {
           username: userFilter || undefined,
           per_page: 50,
         });
-        setPosts(Array.isArray(results) ? results : (results as any).data || []);
+        setPosts(Array.isArray(results) ? results : []);
       } catch { console.error('Search failed'); }
       finally { setLoading(false); }
     };

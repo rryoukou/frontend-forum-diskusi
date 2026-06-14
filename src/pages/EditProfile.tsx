@@ -74,8 +74,9 @@ const EditProfile: React.FC = () => {
       dispatch(setUser(updatedUser));
       setSuccess(true);
       setTimeout(() => navigate(`/profiles/${user?.username}`), 800);
-    } catch (err: any) {
-      setError(err.response?.data?.message || err.response?.data?.errors?.avatar?.[0] || 'Failed to update profile');
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { message?: string; errors?: { avatar?: string[] } } } };
+      setError(error.response?.data?.message || error.response?.data?.errors?.avatar?.[0] || 'Failed to update profile');
     } finally {
       setLoading(false);
     }
