@@ -1,3 +1,8 @@
+# Cypress
+cypress/
+cypress.config.ts
+cypress.env.json
+
 # Logs
 logs
 *.log
@@ -22,3 +27,11 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Cypress
+cypress/videos
+cypress/screenshots
+cypress/downloads
+cypress.env.json
+"cypress/" 
+"cypress.config.ts" 

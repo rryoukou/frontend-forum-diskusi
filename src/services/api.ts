@@ -1,5 +1,8 @@
 import axios from 'axios';
 
+/**
+ * Konfigurasi Dasar Axios untuk berkomunikasi dengan Backend API.
+ */
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
   headers: {
@@ -8,7 +11,9 @@ const api = axios.create({
   },
 });
 
-// Add interceptor for authentication token if needed later
+/**
+ * Interceptor Request: Menambahkan Token Autentikasi ke Header jika tersedia.
+ */
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
   if (token) {
@@ -16,5 +21,20 @@ api.interceptors.request.use((config) => {
   }
   return config;
 });
+
+/**
+ * Interceptor Response: Menangani Error secara Global (misal: 401 Unauthorized).
+ */
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      // Jika token tidak valid atau expired, hapus data sesi dan redirect (opsional)
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+    }
+    return Promise.reject(error);
+  }
+);
 
 export default api;

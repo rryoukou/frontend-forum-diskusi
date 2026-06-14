@@ -1,0 +1,378 @@
+/* ============================================================
+   AUTH MODAL — Popup Login / Register
+   Uses project CSS variables — no color overrides
+   ============================================================ */
+
+/* ── Overlay ───────────────────────────────────────────────── */
+.auth-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--sp-4);
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  animation: am-overlay-in 0.2s ease;
+  overflow-y: auto;
+}
+
+@keyframes am-overlay-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ── Background blobs ──────────────────────────────────────── */
+.auth-modal-blob {
+  position: fixed;
+  border-radius: 50%;
+  filter: blur(90px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.auth-modal-blob-1 {
+  width: 480px;
+  height: 480px;
+  background: radial-gradient(circle, rgba(0, 208, 132, 0.14), transparent 65%);
+  top: -150px;
+  left: -100px;
+}
+
+.auth-modal-blob-2 {
+  width: 380px;
+  height: 380px;
+  background: radial-gradient(circle, rgba(0, 208, 132, 0.07), transparent 65%);
+  bottom: -120px;
+  right: -80px;
+}
+
+/* ── Panel ─────────────────────────────────────────────────── */
+.auth-modal-panel {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 400px;
+  background: rgba(22, 22, 22, 0.98);
+  border: 1px solid rgba(0, 208, 132, 0.12);
+  border-radius: 16px;
+  padding: 28px 32px 32px;
+  box-shadow:
+    0 24px 60px rgba(0, 0, 0, 0.7),
+    0 0 0 1px rgba(255, 255, 255, 0.04) inset;
+  animation: am-panel-in 0.28s cubic-bezier(0.34, 1.3, 0.64, 1);
+  backdrop-filter: blur(32px);
+  -webkit-backdrop-filter: blur(32px);
+  overflow: visible;
+}
+
+@keyframes am-panel-in {
+  from { opacity: 0; transform: translateY(24px) scale(0.96); }
+  to   { opacity: 1; transform: translateY(0)    scale(1); }
+}
+
+/* ── Close button ──────────────────────────────────────────── */
+.auth-modal-close {
+  position: absolute;
+  top: -14px;
+  right: -14px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--surface-3);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--text-2);
+  transition: var(--transition);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+}
+
+.auth-modal-close:hover {
+  background: var(--danger);
+  color: #fff;
+  border-color: var(--danger);
+  transform: scale(1.1);
+}
+
+/* ── Tabs ──────────────────────────────────────────────────── */
+.auth-modal-tabs {
+  display: flex;
+  gap: 3px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 3px;
+  margin-bottom: var(--sp-5);
+}
+
+.auth-modal-tab {
+  flex: 1;
+  padding: 0.4rem var(--sp-3);
+  border-radius: 7px;
+  border: none;
+  background: transparent;
+  color: var(--text-3);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: var(--transition);
+  letter-spacing: 0.01em;
+}
+
+.auth-modal-tab:hover {
+  color: var(--text-2);
+  background: var(--surface-3);
+}
+
+.auth-modal-tab--active {
+  background: var(--primary-light);
+  color: var(--primary);
+  border: 1px solid rgba(0, 208, 132, 0.2);
+}
+
+/* ── Header ────────────────────────────────────────────────── */
+.auth-modal-header {
+  text-align: center;
+  margin-bottom: 22px;
+}
+
+.auth-modal-logo {
+  width: 46px;
+  height: 46px;
+  margin: 0 auto 12px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--gradient-primary);
+  box-shadow: 0 6px 20px rgba(0, 208, 132, 0.35);
+}
+
+.auth-modal-header h2 {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--text-1);
+  letter-spacing: -0.03em;
+  margin-bottom: 4px;
+}
+
+.auth-modal-header p {
+  font-size: 0.8125rem;
+  color: var(--text-3);
+}
+
+/* ── Error banner ──────────────────────────────────────────── */
+.am-error {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: 10px 14px;
+  margin-bottom: 18px;
+  border-radius: 10px;
+  background: var(--danger-light);
+  border: 1px solid rgba(255, 77, 106, 0.25);
+  color: var(--danger);
+  font-size: 0.825rem;
+  font-weight: 500;
+}
+
+/* ── Form fields ───────────────────────────────────────────── */
+.am-field {
+  margin-bottom: 12px;
+}
+
+.am-label {
+  display: block;
+  margin-bottom: 5px;
+  color: var(--text-2);
+  font-size: 0.775rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.am-input {
+  width: 100%;
+  padding: 9px 12px;
+  border-radius: 8px;
+  border: 1.5px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text-1);
+  font-size: 0.875rem;
+  font-family: inherit;
+  transition: var(--transition);
+  outline: none;
+}
+
+.am-input::placeholder { color: var(--text-3); }
+
+.am-input:focus {
+  border-color: var(--primary);
+  background: var(--surface-3);
+  box-shadow: 0 0 0 3px rgba(0, 208, 132, 0.1);
+}
+
+.am-input--error {
+  border-color: var(--danger) !important;
+  background: rgba(255, 77, 106, 0.05) !important;
+}
+
+.am-input--error:focus {
+  box-shadow: 0 0 0 3px rgba(255, 77, 106, 0.12) !important;
+}
+
+/* ── Password field ────────────────────────────────────────── */
+.am-pw-wrap {
+  position: relative;
+}
+
+.am-pw-toggle {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-3);
+  display: flex;
+  align-items: center;
+  padding: 0;
+  transition: var(--transition);
+}
+
+.am-pw-toggle:hover { color: var(--primary); }
+
+/* ── Field feedback ────────────────────────────────────────── */
+.am-field-error,
+.am-field-success {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 5px;
+  font-size: 0.76rem;
+  font-weight: 500;
+  animation: am-feedback-in 0.16s ease;
+}
+
+.am-field-error  { color: var(--danger);  }
+.am-field-success { color: var(--success); }
+
+@keyframes am-feedback-in {
+  from { opacity: 0; transform: translateY(-3px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Password strength ─────────────────────────────────────── */
+.am-strength {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  margin-top: 7px;
+}
+
+.am-strength-track {
+  flex: 1;
+  height: 3px;
+  background: var(--border);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.am-strength-fill {
+  height: 100%;
+  border-radius: var(--radius-full);
+  transition: width 0.3s ease, background 0.25s ease;
+}
+
+/* ── Submit button ─────────────────────────────────────────── */
+.am-submit {
+  width: 100%;
+  padding: 10px;
+  margin-top: 6px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 700;
+  font-family: inherit;
+  color: #0d0d0d;
+  background: var(--gradient-primary);
+  box-shadow: 0 4px 16px rgba(0, 208, 132, 0.3);
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  letter-spacing: 0.02em;
+}
+
+.am-submit:hover:not(:disabled) {
+  opacity: 0.9;
+  transform: translateY(-1px);
+  box-shadow: 0 10px 28px rgba(0, 208, 132, 0.45);
+}
+
+.am-submit:active:not(:disabled) { transform: translateY(0); }
+
+.am-submit:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.am-spin {
+  animation: am-rotate 0.7s linear infinite;
+}
+
+@keyframes am-rotate {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* ── Switch link ───────────────────────────────────────────── */
+.am-switch {
+  margin-top: 16px;
+  text-align: center;
+  color: var(--text-3);
+  font-size: 0.8125rem;
+}
+
+.am-switch-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--primary);
+  font-weight: 700;
+  font-size: inherit;
+  font-family: inherit;
+  padding: 0;
+  transition: var(--transition);
+}
+
+.am-switch-btn:hover {
+  color: var(--accent);
+  text-decoration: underline;
+}
+
+/* ── Responsive ────────────────────────────────────────────── */
+@media (max-width: 520px) {
+  .auth-modal-panel {
+    padding: 22px 20px 26px;
+    border-radius: 12px;
+  }
+
+  .auth-modal-header h2 { font-size: 1.1rem; }
+
+  .auth-modal-logo {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+  }
+}
