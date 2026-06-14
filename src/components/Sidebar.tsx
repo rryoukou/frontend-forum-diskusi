@@ -211,6 +211,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
             <>
               <div className="sidebar__section-label">Admin</div>
               <SidebarLink to="/admin"             icon={<LayoutDashboard size={15} />} active={location.pathname === '/admin' || location.pathname === '/admin/dashboard'} onClick={onClose}>Dashboard</SidebarLink>
+              <SidebarLink to="/admin/users"      icon={<User            size={15} />} active={isActive('/admin/users')}       onClick={onClose}>Manage Users</SidebarLink>
               <SidebarLink to="/admin/categories" icon={<FolderOpen      size={15} />} active={location.pathname === '/admin/categories'}  onClick={onClose}>Categories</SidebarLink>
               {/* 👈 Navigasi Tambahan Baru untuk Management Roles */}
 <SidebarLink to="/admin/roles"      icon={<ShieldAlert     size={15} />} active={isActive('/admin/roles')}       onClick={onClose}>Manage Roles</SidebarLink>
