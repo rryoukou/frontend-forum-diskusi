@@ -12,7 +12,8 @@ interface Role {
 
 interface User {
   id: string;
-  name: string;
+  name?: string; // Optional untuk backward compatibility
+  username?: string; // Bisa jadi ini yang dipakai
   email: string;
   is_banned: boolean;
   roles?: Role[];
@@ -203,7 +204,7 @@ const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({ stats, users = 
             <tbody>
               {users?.map((user) => (
                 <tr key={user?.id} style={{ borderBottom: '1px solid var(--border)', color: 'var(--text-1)' }}>
-                  <td style={{ padding: '1rem', fontWeight: 500 }}>{user?.name}</td>
+                  <td style={{ padding: '1rem', fontWeight: 500 }}>{user?.name || user?.username || 'N/A'}</td>
                   <td style={{ padding: '1rem', color: 'var(--text-2)' }}>{user?.email}</td>
                   <td style={{ padding: '1rem' }}>{renderRoleBadges(user)}</td>
                   <td style={{ padding: '1rem', textAlign: 'center' }}>

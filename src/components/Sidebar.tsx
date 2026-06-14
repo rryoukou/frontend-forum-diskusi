@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import * as Avatar from '@radix-ui/react-avatar';
 import {
   Home, Trophy, Search, PenLine, User, Bookmark,
-  Bell, TrendingUp, Flag, ScrollText, Users, FolderOpen,
+  Bell, TrendingUp, Flag, ScrollText, FolderOpen,
   LogOut, ChevronDown, X, LayoutDashboard, ShieldAlert // 👈 Tambahkan ShieldAlert di sini
 } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '../store/hooks';

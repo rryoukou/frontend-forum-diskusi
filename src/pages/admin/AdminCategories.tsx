@@ -3,7 +3,15 @@ import AdminLayout from '../../layouts/AdminLayout';
 import type { Category } from '../../types/index';
 import AdminCategoryView from './AdminCategoryView';
 // Import Axios instance atau service kamu yang menggunakan Axios
-import categoryService from '../../services/categoryService'; 
+import categoryService from '../../services/categoryService';
+
+// ─── Interface untuk Tipe Data Form (Pengganti 'any' di baris 94) ───
+export interface CategoryFormValues {
+  name: string;
+  slug: string;
+  description?: string;
+  parent_id?: string;
+}
 
 /* ─── Custom Hook: Mengelola State & Handler Berbasis Axios ─── */
 function useAdminCategories() {
@@ -90,17 +98,17 @@ function useAdminCategories() {
     setEditingCat(null);
   };
 
-  // Sinkronisasi dengan handler submit yang dipanggil Formik di AdminCategoryView
-  const handleFormSubmit = async (values: any) => {
+  // SINKRONISASI: Tipe data 'any' sudah diganti dengan 'CategoryFormValues'
+  const handleFormSubmit = async (values: CategoryFormValues) => {
     setSubmitting(true);
     setError(null);
     try {
       // Bersihkan nilai 'none' dari Radix Select menjadi undefined/string kosong sebelum dikirim ke Axios
-      const submitData = { 
+      const submitData = {
         name: values.name,
         slug: values.slug,
         description: values.description,
-        parent_id: values.parent_id === 'none' || !values.parent_id ? undefined : values.parent_id 
+        parent_id: values.parent_id === 'none' || !values.parent_id ? undefined : values.parent_id
       };
 
       if (editingCategory) {

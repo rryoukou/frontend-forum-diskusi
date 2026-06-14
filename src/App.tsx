@@ -10,7 +10,6 @@ import PostDetail from './pages/PostDetail';
 import CategoryPosts from './pages/CategoryPosts';
 import AdminDashboard from './pages/admin/AdminDashboard'; // Menggunakan ini untuk dashboard & user management
 import AdminCategories from './pages/admin/AdminCategories';
-import UserManagement from './pages/admin/UserManagement';
 import ModeratorDashboard from './pages/moderator/ModeratorDashboard';
 import ModerationLogs from './pages/moderator/ModerationLogs';
 import Notifications from './pages/Notifications';

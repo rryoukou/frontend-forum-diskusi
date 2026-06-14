@@ -4,6 +4,44 @@ import { VitePWA } from 'vite-plugin-pwa'
 
 // https://vite.dev/config/
 export default defineConfig({
+  // Tauri requires a consistent port
+  server: {
+    port: 5173,
+    strictPort: true,
+    host: true,
+  },
+  build: {
+    // Tauri uses Chromium on Windows and WebKit on macOS and Linux
+    target: ['es2021', 'chrome100', 'safari14'],
+    // Optimasi untuk mengurangi bundle size
+    rollupOptions: {
+      output: {
+        manualChunks: (id) => {
+          if (id.includes('node_modules')) {
+            if (id.includes('react') || id.includes('react-dom') || id.includes('react-router-dom')) {
+              return 'react-vendor';
+            }
+            if (id.includes('@reduxjs/toolkit') || id.includes('react-redux')) {
+              return 'redux-vendor';
+            }
+            if (id.includes('@radix-ui')) {
+              return 'ui-vendor';
+            }
+            if (id.includes('formik') || id.includes('yup')) {
+              return 'form-vendor';
+            }
+          }
+        },
+      },
+    },
+    // Minify untuk production
+    minify: 'terser',
+    terserOptions: {
+      compress: {
+        drop_console: true, // Hapus console.log di production
+      },
+    },
+  },
   plugins: [
     react(),
     VitePWA({

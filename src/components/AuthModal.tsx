@@ -166,7 +166,7 @@ const LoginForm: React.FC<{ onSuccess: () => void; onSwitchToRegister: () => voi
   return (
     <>
       <div className="auth-modal-header">
-        <LogoIcon size={48} variant="color" />
+        <LogoIcon size={48} />
         <h2>Welcome Back</h2>
         <p>Sign in to continue to your account</p>
       </div>
@@ -264,7 +264,7 @@ const RegisterForm: React.FC<{ onSuccess: () => void; onSwitchToLogin: () => voi
   return (
     <>
       <div className="auth-modal-header">
-        <LogoIcon size={48} variant="color" />
+        <LogoIcon size={48} />
         <h2>Create Account</h2>
         <p>Join the community and start sharing.</p>
       </div>

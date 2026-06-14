@@ -100,7 +100,7 @@ const Register: React.FC = () => {
         <div className="auth-card auth-card-wide">
           {/* Header */}
           <div className="auth-header">
-            <LogoIcon size={52} variant="color" />
+            <LogoIcon size={52} />
             <h1>Create Account</h1>
             <p>Join our community and start sharing today.</p>
           </div>

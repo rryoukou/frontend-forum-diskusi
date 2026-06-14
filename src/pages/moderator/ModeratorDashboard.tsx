@@ -85,7 +85,7 @@ const ModeratorDashboard = () => {
   };
 
   const handleModConfirm = async (reason: string) => {
-    const { type, userId, username } = modal;
+    const { type, userId } = modal;
     
     try {
       if (type === 'warn') {

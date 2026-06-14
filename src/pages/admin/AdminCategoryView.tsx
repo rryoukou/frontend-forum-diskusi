@@ -5,9 +5,15 @@ import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
 import {
   Plus, Pencil, Trash2, FolderTree, X, Check, Search,
-  Tag, FileText, Calendar, ArrowUpRight, Link2, ChevronDown
+  Tag, FileText, Calendar, ArrowUpRight, Link2, ChevronDown,
+  Laptop, Book, Briefcase, Activity, Palette, Heart,
+  Brain, Stethoscope, Pill, Cpu, Code, Database,
+  Globe, Sparkles, Zap, Target, TrendingUp, Users,
+  MessageCircle, Megaphone, Lightbulb, Rocket, Trophy,
+  Star, Shield, Award, Layers
 } from 'lucide-react';
 import type { Category } from '../../types/index';
+import type { CategoryFormValues } from './AdminCategories';
 
 interface AdminCategoryViewProps {
   categories: Category[];
@@ -22,7 +28,7 @@ interface AdminCategoryViewProps {
   subCategories: number;
   handleOpenModal: (cat?: Category | null) => void;
   handleCloseModal: () => void;
-  handleFormSubmit: (values: any) => Promise<void>;
+  handleFormSubmit: (values: CategoryFormValues) => Promise<void>;
   handleDelete: (id: string) => void;
   setSelectedCategory: (cat: Category | null) => void;
 }
@@ -89,8 +95,53 @@ const CategorySkeleton: React.FC = () => {
 };
 
 const getCategoryIcon = (name: string) => {
-  const icons = ['📚', '💼', '🔬', '🎨', '💻', '🏥', '📝', '🎯'];
-  return icons[name.charCodeAt(0) % icons.length];
+  const lower = name.toLowerCase();
+  
+  // Teknologi & Programming
+  if (lower.includes('teknologi') || lower.includes('technology')) return Laptop;
+  if (lower.includes('program') || lower.includes('coding') || lower.includes('code')) return Code;
+  if (lower.includes('database') || lower.includes('sql')) return Database;
+  if (lower.includes('web') || lower.includes('internet')) return Globe;
+  if (lower.includes('ai') || lower.includes('machine learning') || lower.includes('ml')) return Cpu;
+  
+  // Bisnis & Karir
+  if (lower.includes('bisnis') || lower.includes('business')) return Briefcase;
+  if (lower.includes('karir') || lower.includes('career')) return TrendingUp;
+  if (lower.includes('marketing') || lower.includes('promosi')) return Megaphone;
+  if (lower.includes('sales') || lower.includes('penjualan')) return Target;
+  
+  // Kesehatan
+  if (lower.includes('cardio') || lower.includes('jantung') || lower.includes('heart')) return Heart;
+  if (lower.includes('neuro') || lower.includes('otak') || lower.includes('brain')) return Brain;
+  if (lower.includes('umum') || lower.includes('general') || lower.includes('health')) return Stethoscope;
+  if (lower.includes('diabetes') || lower.includes('drug') || lower.includes('obat')) return Pill;
+  if (lower.includes('respirat') || lower.includes('pernafasan')) return Activity;
+  
+  // Kreativitas & Seni
+  if (lower.includes('seni') || lower.includes('art') || lower.includes('design')) return Palette;
+  if (lower.includes('kreatif') || lower.includes('creative')) return Sparkles;
+  
+  // Edukasi & Pembelajaran
+  if (lower.includes('edukasi') || lower.includes('education') || lower.includes('belajar')) return Book;
+  if (lower.includes('tutorial') || lower.includes('panduan')) return Lightbulb;
+  
+  // Komunitas & Sosial
+  if (lower.includes('komunitas') || lower.includes('community')) return Users;
+  if (lower.includes('diskusi') || lower.includes('discussion') || lower.includes('forum')) return MessageCircle;
+  
+  // Achievement & Gamification
+  if (lower.includes('achievement') || lower.includes('pencapaian')) return Trophy;
+  if (lower.includes('badge') || lower.includes('lencana')) return Award;
+  if (lower.includes('ranking') || lower.includes('peringkat')) return Star;
+  
+  // Lain-lain
+  if (lower.includes('olahraga') || lower.includes('sport') || lower.includes('fitness')) return Zap;
+  if (lower.includes('innovation') || lower.includes('inovasi')) return Rocket;
+  if (lower.includes('security') || lower.includes('keamanan')) return Shield;
+  if (lower.includes('misc') || lower.includes('lainnya') || lower.includes('other')) return Layers;
+  
+  // Default fallback
+  return FolderTree;
 };
 
 const getCategoryIconStyle = (name: string): React.CSSProperties => {
@@ -261,8 +312,8 @@ const AdminCategoryView: React.FC<AdminCategoryViewProps> = ({
                     cursor: 'pointer', minHeight: 68, boxSizing: 'border-box', transition: 'var(--transition)'
                   }}
                 >
-                  <div style={{ width: 40, height: 40, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 'var(--radius)', fontSize: '1.1rem', ...(isSelected ? { background: 'var(--primary-light)', color: 'var(--primary)' } : getCategoryIconStyle(cat.name)) }}>
-                    {getCategoryIcon(cat.name)}
+                  <div style={{ width: 40, height: 40, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 'var(--radius)', ...(isSelected ? { background: 'var(--primary-light)', color: 'var(--primary)' } : getCategoryIconStyle(cat.name)) }}>
+                    {React.createElement(getCategoryIcon(cat.name), { size: 18, strokeWidth: 2.5 })}
                   </div>
 
                   <div style={{ minWidth: 0, flex: 1 }}>
@@ -291,8 +342,8 @@ const AdminCategoryView: React.FC<AdminCategoryViewProps> = ({
           <div style={{ ...cardStyle, padding: '1.75rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1.5px solid var(--border)', paddingBottom: '1.25rem', marginBottom: '1.5rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-                <div style={{ width: 52, height: 52, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 14, fontSize: '1.6rem', ...getCategoryIconStyle(selectedCategory.name) }}>
-                  {getCategoryIcon(selectedCategory.name)}
+                <div style={{ width: 52, height: 52, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 14, ...getCategoryIconStyle(selectedCategory.name) }}>
+                  {React.createElement(getCategoryIcon(selectedCategory.name), { size: 24, strokeWidth: 2.5 })}
                 </div>
                 <div>
                   <h2 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 700, color: 'var(--text-1)' }}>{selectedCategory.name}</h2>

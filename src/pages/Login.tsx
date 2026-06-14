@@ -66,7 +66,7 @@ const Login: React.FC = () => {
         <div className="auth-card">
           {/* Header */}
           <div className="auth-header">
-            <LogoIcon size={52} variant="color" />
+            <LogoIcon size={52} />
             <h1>Welcome Back</h1>
             <p>Sign in to continue to your account</p>
           </div>

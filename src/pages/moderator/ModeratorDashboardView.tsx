@@ -43,15 +43,15 @@ interface ModeratorDashboardViewProps {
   handleWarnUser: (
     userId: string,
     username: string
-  ) => Promise<void>;
+  ) => void;
   handleBanUser: (
     userId: string,
     username: string
-  ) => Promise<void>;
+  ) => void;
   handleUnbanUser: (
     userId: string,
     username: string
-  ) => Promise<void>;
+  ) => void;
 }
 
 const ModeratorDashboardView: React.FC<ModeratorDashboardViewProps> = ({
