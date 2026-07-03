@@ -235,7 +235,7 @@ const Profile: React.FC = () => {
                 <div style={{ textAlign: 'left' }}>
                   <p style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 'var(--sp-3)' }}>Badges</p>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--sp-2)' }}>
-                    {profile.badges.map((badge: { id: string; name: string; description: string; icon_url?: string }) => (
+                    {profile.badges.map((badge: any) => (
                       <div key={badge.id} title={badge.description} style={{ width: 40, height: 40, borderRadius: 'var(--radius-sm)', background: 'var(--gradient-soft)', border: '1.5px solid var(--primary-light)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'help' }}>
                         {badge.icon_url ? <img src={badge.icon_url} alt={badge.name} style={{ width: 22 }} /> : <Medal size={18} strokeWidth={2} style={{ color: 'var(--primary)' }} />}
                       </div>

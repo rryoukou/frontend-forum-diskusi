@@ -155,7 +155,7 @@ const PostDetail: React.FC = () => {
   const [replyingTo, setReplyingTo]             = useState<Comment | null>(null);
   const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
   const [editCommentBody, setEditCommentBody]   = useState('');
-  const [history, setHistory]                   = useState([]);
+  const [history, setHistory]                   = useState<any[]>([]);
   const [historyTitle, setHistoryTitle]         = useState('');
   const [isHistoryOpen, setIsHistoryOpen]       = useState(false);
   const [reportTarget, setReportTarget]         = useState<{ id: string; type: 'post' | 'comment' } | null>(null);
