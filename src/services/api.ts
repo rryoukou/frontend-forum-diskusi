@@ -4,7 +4,8 @@ import axios from 'axios';
  * Konfigurasi Dasar Axios untuk berkomunikasi dengan Backend API.
  */
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
+  // Ditambahkan fallback URL ke Render + /api agar aman jika env Vercel tidak terbaca
+  baseURL: import.meta.env.VITE_API_URL || 'https://backend-forum-diskusi.onrender.com/api',
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json',
